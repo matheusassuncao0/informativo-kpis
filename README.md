@@ -22,6 +22,9 @@ index.html + assets/app.js  (soma as lojas, calcula razões e variações no nav
 
 - **Comparativo:** mês corrente até D-1 vs mesmo período do mês anterior (31/03 compara com 28/02).
 - **Total de lojas:** as SQLs devolvem só componentes aditivos (ex.: entregues e no prazo). Percentuais são calculados depois da soma, nunca como média de percentuais.
+- **Projeção de fechamento:** realizado ÷ meta até D-1 × meta do mês inteiro, ou seja, mantém o atingimento atual até o fim do mês. Como a meta diária já empurra fim de semana e feriado para o dia útil seguinte, a projeção respeita o calendário em vez de ser uma média linear por dia.
+- **Farol:** > 103% acima, 97% a 103% na faixa, < 97% abaixo (mesmos limites do dashboard).
+- **Resumo e "Onde agir":** gerados no navegador a partir do JSON. Destaques de OTD por loja só consideram lojas com ao menos 100 entregas no período.
 - **Estoque:** foto atual, sem comparativo (a origem não tem histórico).
 - **Vendas:** o dashboard Desempenho de vendas lê o Databricks; `sql/vendas.sql` usa as views equivalentes no BigQuery, que podem divergir. A meta padrão é Forecast (igual ao dashboard), com opção de Budget no site.
 - Cada SQL documenta no cabeçalho qual medida DAX ela espelha.

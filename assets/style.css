@@ -265,6 +265,127 @@ body {
   color: var(--texto-2);
 }
 
+/* Resumo: o texto carrega o significado; a bolinha só reforça o tom */
+.destaques {
+  list-style: none;
+  margin: 24px 0 0;
+  padding: 8px 24px;
+  background: var(--superficie);
+  border: 1px solid var(--borda);
+  border-radius: 20px;
+}
+.destaque {
+  position: relative;
+  padding: 14px 0 14px 24px;
+  color: var(--texto-2);
+}
+.destaque + .destaque { border-top: 1px solid var(--borda); }
+.destaque::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 22px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--zero);
+}
+.destaque--bom::before { background: var(--positivo); }
+.destaque--ruim::before { background: var(--negativo); }
+.destaque--alerta::before { background: var(--alerta); }
+
+/* Medidor de ritmo: trilho é um tom mais claro da mesma cor do preenchimento;
+   a marca branca é o esperado até ontem */
+.medidor {
+  position: relative;
+  height: 8px;
+  margin: 10px 0 4px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.08);
+}
+.medidor__preenchimento {
+  height: 100%;
+  border-radius: 4px;
+  background: var(--zero);
+}
+.medidor--bom { background: rgba(50, 204, 126, 0.18); }
+.medidor--bom .medidor__preenchimento { background: var(--positivo); }
+.medidor--alerta { background: rgba(255, 172, 72, 0.18); }
+.medidor--alerta .medidor__preenchimento { background: var(--alerta); }
+.medidor--ruim { background: rgba(229, 40, 98, 0.22); }
+.medidor--ruim .medidor__preenchimento { background: var(--negativo); }
+.medidor__marca {
+  position: absolute;
+  top: -4px;
+  width: 2px;
+  height: 16px;
+  margin-left: -1px;
+  border-radius: 1px;
+  background: var(--texto);
+}
+
+/* Tabela "onde agir" */
+.tabela-envoltorio {
+  margin-top: 24px;
+  overflow-x: auto;
+  background: var(--superficie);
+  border: 1px solid var(--borda);
+  border-radius: 20px;
+}
+.tabela {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.tabela th,
+.tabela td {
+  padding: 12px 16px;
+  text-align: left;
+  white-space: nowrap;
+}
+.tabela thead th {
+  border-bottom: 1px solid var(--borda);
+  color: var(--texto-3);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.tabela tbody tr + tr > * { border-top: 1px solid var(--borda); }
+.tabela tbody td { color: var(--texto-2); }
+.tabela .num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.tabela .num--fraco { color: var(--texto-4); }
+.link-loja {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--texto);
+  font: inherit;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+}
+.link-loja:hover { color: var(--roxo-texto); text-decoration: underline; }
+.botao-secundario {
+  margin-top: 16px;
+  padding: 8px 20px;
+  border: 1px solid var(--borda-forte);
+  border-radius: 100px;
+  background: transparent;
+  color: var(--texto-2);
+  font: inherit;
+  cursor: pointer;
+}
+.botao-secundario:hover { border-color: var(--texto-3); color: var(--texto); }
+.link-loja:focus-visible,
+.botao-secundario:focus-visible {
+  outline: 2px solid var(--roxo);
+  outline-offset: 2px;
+}
+
 /* Rodapé */
 .rodape {
   margin-top: 64px;

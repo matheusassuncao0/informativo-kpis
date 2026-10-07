@@ -18,11 +18,13 @@
 --   Loja          = dim_sellers.company_name via seller_id = id. A meta é por tenant e
 --                   fica presa ao seller flagship, então só aparece no company_name dele.
 -- Tipo de venda comparado em minúsculas: a relação no Power BI não diferencia caixa.
+-- Metas do mês inteiro (*_mes) alimentam a projeção de fechamento no site.
 -- Parâmetro: @data_ref (DATE) = D-1.
 WITH periodos AS (
   SELECT
     DATE_TRUNC(@data_ref, MONTH) AS ini_atual,
     @data_ref AS fim_atual,
+    LAST_DAY(@data_ref, MONTH) AS fim_mes,
     DATE_SUB(DATE_TRUNC(@data_ref, MONTH), INTERVAL 1 MONTH) AS ini_anterior,
     DATE_SUB(@data_ref, INTERVAL 1 MONTH) AS fim_anterior
 ),
@@ -81,10 +83,15 @@ SELECT
   SUM(IF(f.metrica = 'ser' AND f.dia BETWEEN p.ini_atual AND p.fim_atual, f.valor, NULL)) AS ser_atual,
   SUM(IF(f.metrica = 'ser' AND f.dia BETWEEN p.ini_anterior AND p.fim_anterior, f.valor, NULL)) AS ser_anterior,
   SUM(IF(f.metrica = 'ser_forecast' AND f.dia BETWEEN p.ini_atual AND p.fim_atual, f.valor, NULL)) AS ser_forecast,
-  SUM(IF(f.metrica = 'ser_budget' AND f.dia BETWEEN p.ini_atual AND p.fim_atual, f.valor, NULL)) AS ser_budget
+  SUM(IF(f.metrica = 'ser_budget' AND f.dia BETWEEN p.ini_atual AND p.fim_atual, f.valor, NULL)) AS ser_budget,
+  SUM(IF(f.metrica = 'gmv_forecast' AND f.dia BETWEEN p.ini_atual AND p.fim_mes, f.valor, NULL)) AS gmv_forecast_mes,
+  SUM(IF(f.metrica = 'gmv_budget' AND f.dia BETWEEN p.ini_atual AND p.fim_mes, f.valor, NULL)) AS gmv_budget_mes,
+  SUM(IF(f.metrica = 'ser_forecast' AND f.dia BETWEEN p.ini_atual AND p.fim_mes, f.valor, NULL)) AS ser_forecast_mes,
+  SUM(IF(f.metrica = 'ser_budget' AND f.dia BETWEEN p.ini_atual AND p.fim_mes, f.valor, NULL)) AS ser_budget_mes
 FROM fatos AS f
 CROSS JOIN periodos AS p
 LEFT JOIN gold_master_data_context.dim_sellers AS ds
   ON ds.id = f.seller_id
-WHERE f.dia BETWEEN p.ini_anterior AND p.fim_atual
+-- Até fim_mes só para as metas: o realizado nunca passa de D-1 nos SUMs acima.
+WHERE f.dia BETWEEN p.ini_anterior AND p.fim_mes
 GROUP BY loja
