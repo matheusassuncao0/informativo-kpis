@@ -16,6 +16,8 @@
 --     budget      = vw_dim_goals / vw_dim_goal_ser
 --   Pedidos/itens = pedidos distintos e SUM(itens_faturado) com os mesmos filtros do GMV
 --                   (não existem no dashboard; servem para separar volume de ticket)
+--   Desconto      = SUM(desconto_faturado). Só algumas lojas preenchem (ex.: Estée Lauder,
+--                   Hyperapharma); zero aqui quase sempre é "não informado", não "sem desconto"
 --   Loja          = dim_sellers.company_name via seller_id = id, com fallback na
 --                   vw_sellers_industria (sellers B2B). A meta é por tenant e fica presa ao
 --                   seller flagship, então só aparece no company_name dele.
@@ -45,6 +47,7 @@ fatos AS (
     CAST(f.receita_faturada AS FLOAT64) AS valor,
     f.order_code AS pedido,
     CAST(f.itens_faturado AS FLOAT64) AS itens,
+    CAST(f.desconto_faturado AS FLOAT64) AS desconto,
     f.business_model_internal_fat AS modelo
   FROM visualization_order_cycle_context.vw_fat_order_sales_summary AS f
   WHERE f.invoice_canceled_date IS NULL
@@ -55,28 +58,28 @@ fatos AS (
 
   UNION ALL
 
-  SELECT s.seller_id, 'ser', CAST(s.invoiced_date AS DATE), CAST(s.ser_projetado AS FLOAT64), NULL, NULL, NULL
+  SELECT s.seller_id, 'ser', CAST(s.invoiced_date AS DATE), CAST(s.ser_projetado AS FLOAT64), NULL, NULL, NULL, NULL
   FROM visualization_order_cycle_context.vw_ser_projetado AS s
   WHERE LOWER(s.item_cfop_type) = 'venda'
 
   UNION ALL
 
-  SELECT seller_id, 'gmv_forecast', CAST(date AS DATE), CAST(goal_calculated AS FLOAT64), NULL, NULL, NULL
+  SELECT seller_id, 'gmv_forecast', CAST(date AS DATE), CAST(goal_calculated AS FLOAT64), NULL, NULL, NULL, NULL
   FROM visualization_master_data_context.vw_dim_forecast
 
   UNION ALL
 
-  SELECT seller_id, 'gmv_budget', CAST(date AS DATE), CAST(goal_calculated AS FLOAT64), NULL, NULL, NULL
+  SELECT seller_id, 'gmv_budget', CAST(date AS DATE), CAST(goal_calculated AS FLOAT64), NULL, NULL, NULL, NULL
   FROM visualization_master_data_context.vw_dim_goals
 
   UNION ALL
 
-  SELECT seller_id, 'ser_forecast', CAST(date AS DATE), CAST(ser_goal_calculated AS FLOAT64), NULL, NULL, NULL
+  SELECT seller_id, 'ser_forecast', CAST(date AS DATE), CAST(ser_goal_calculated AS FLOAT64), NULL, NULL, NULL, NULL
   FROM visualization_master_data_context.vw_dim_forecast_ser
 
   UNION ALL
 
-  SELECT seller_id, 'ser_budget', CAST(date AS DATE), CAST(ser_goal_calculated AS FLOAT64), NULL, NULL, NULL
+  SELECT seller_id, 'ser_budget', CAST(date AS DATE), CAST(ser_goal_calculated AS FLOAT64), NULL, NULL, NULL, NULL
   FROM visualization_master_data_context.vw_dim_goal_ser
 ),
 
@@ -123,6 +126,9 @@ SELECT
   SUM(IF(c.metrica = 'gmv' AND c.dia BETWEEN p.ini_atual AND p.fim_atual, c.itens, NULL)) AS itens_atual,
   SUM(IF(c.metrica = 'gmv' AND c.dia BETWEEN p.ini_anterior AND p.fim_anterior, c.itens, NULL)) AS itens_anterior,
   SUM(IF(c.metrica = 'gmv' AND c.dia BETWEEN p.ini_alinhado AND p.fim_alinhado, c.itens, NULL)) AS itens_alinhado,
+  SUM(IF(c.metrica = 'gmv' AND c.dia BETWEEN p.ini_atual AND p.fim_atual, c.desconto, NULL)) AS desconto_atual,
+  SUM(IF(c.metrica = 'gmv' AND c.dia BETWEEN p.ini_anterior AND p.fim_anterior, c.desconto, NULL)) AS desconto_anterior,
+  SUM(IF(c.metrica = 'gmv' AND c.dia BETWEEN p.ini_alinhado AND p.fim_alinhado, c.desconto, NULL)) AS desconto_alinhado,
   SUM(IF(c.metrica = 'gmv_forecast' AND c.dia BETWEEN p.ini_atual AND p.fim_atual, c.valor, NULL)) AS gmv_forecast,
   SUM(IF(c.metrica = 'gmv_budget' AND c.dia BETWEEN p.ini_atual AND p.fim_atual, c.valor, NULL)) AS gmv_budget,
   SUM(IF(c.metrica = 'gmv_forecast' AND c.dia BETWEEN p.ini_atual AND p.fim_mes, c.valor, NULL)) AS gmv_forecast_mes,

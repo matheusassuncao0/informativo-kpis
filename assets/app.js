@@ -224,20 +224,6 @@
     ],
   };
 
-  const SECAO_NPS = {
-    sobretitulo: 'Clientes',
-    titulo: 'Satisfação',
-    nota: 'NPS dos últimos 90 dias (data da resposta) contra os 90 dias anteriores: no mês corrente o volume de respostas é baixo demais. NPS = % promotores (9 e 10) − % detratores (0 a 6).',
-    tiles: [
-      { rotulo: 'NPS (pontos)', atual: i => i.nps.atual, anterior: i => i.nps.anterior, formato: 'nps', melhor: 'alta', rotuloComparacao: '90 dias anteriores',
-        nota: i => {
-          if (i.nps.respostas == null) return null;
-          const pequena = i.nps.respostas < N.BASE_MINIMA_NPS ? ' · amostra pequena, interprete com cuidado' : '';
-          return `${fmt.inteiro.format(i.nps.respostas)} respostas em 90 dias${pequena}`;
-        } },
-    ],
-  };
-
   // ---------------------------------------------------------------------------
   // Seções
 
@@ -313,16 +299,50 @@
     return secao;
   }
 
-  function secaoSaude(item, posicao, ctx) {
-    const secao = novaSecao({
-      sobretitulo: 'Diagnóstico',
-      titulo: 'Saúde da loja',
-      nota: 'Combina vendas vs meta, OTD, ruptura, avaria e NPS (quando houver base). Limites de ruptura, avaria e NPS são pontos de partida e podem ser ajustados.',
-    }, ctx);
-    const grade = criar('div', 'secao__grade');
+  // Barra empilhada de composição (partes de um todo) com legenda em texto: a cor nunca
+  // carrega o significado sozinha. 2px de respiro entre os segmentos.
+  function composicao(partes) {
+    const total = partes.reduce((a, p) => a + p.valor, 0);
+    const caixa = criar('div', 'composicao');
+    const barra = criar('div', 'composicao__barra');
+    barra.setAttribute('role', 'img');
+    barra.setAttribute('aria-label', partes.map(p => `${p.rotulo}: ${fmt.inteiro.format(p.valor)}`).join(', '));
+    const legenda = criar('div', 'composicao__legenda');
+    for (const p of partes) {
+      if (!p.valor) continue;
+      const segmento = criar('div', `composicao__segmento composicao__segmento--${p.classe}`);
+      segmento.style.flexGrow = String(p.valor);
+      segmento.title = `${p.rotulo}: ${fmt.inteiro.format(p.valor)} (${fmt.pct0.format(p.valor / total)})`;
+      barra.append(segmento);
+      legenda.append(status(p.classe, `${p.rotulo} ${p.mostrarPct ? fmt.pct0.format(p.valor / total) : fmt.inteiro.format(p.valor)}`));
+    }
+    caixa.append(barra, legenda);
+    return caixa;
+  }
 
+  function cardNps(ind, ctx) {
     const card = criar('article', 'tile');
-    card.append(criar('h3', 'tile__rotulo', 'Saúde geral'));
+    card.append(criar('h3', 'tile__rotulo', 'NPS · últimos 90 dias (pontos)'));
+    const n = ind.nps;
+    if (n.atual == null) return vazio(card, 'Sem respostas de NPS para esta seleção');
+    const zona = N.zonaNps(n.atual);
+    card.append(criar('p', 'tile__valor', fmt.inteiro.format(n.atual)));
+    card.append(linha(status(zona.classe, zona.rotulo), n.respostas < N.BASE_MINIMA_NPS ? ' · amostra pequena, interprete com cuidado' : ''));
+    card.append(linhaVariacao({ formato: 'nps', melhor: 'alta', rotuloComparacao: '90 dias anteriores' }, n.atual, n.anterior, ctx));
+    const promotores = n.promotores ?? 0;
+    const detratores = n.detratores ?? 0;
+    card.append(composicao([
+      { rotulo: 'Promotores', valor: promotores, classe: 'bom', mostrarPct: true },
+      { rotulo: 'Neutros', valor: Math.max(n.respostas - promotores - detratores, 0), classe: 'neutro', mostrarPct: true },
+      { rotulo: 'Detratores', valor: detratores, classe: 'ruim', mostrarPct: true },
+    ]));
+    card.append(linha(`${fmt.inteiro.format(n.respostas)} respostas · NPS = % promotores (9 e 10) − % detratores (0 a 6)`));
+    return card;
+  }
+
+  function cardSaudeLoja(item) {
+    const card = criar('article', 'tile');
+    card.append(criar('h3', 'tile__rotulo', 'Saúde da loja'));
     card.append(criar('p', `tile__valor saude saude--${item.saude.classe}`, item.saude.rotulo));
     const lista = criar('ul', 'componentes');
     for (const c of item.saude.componentes) {
@@ -336,26 +356,106 @@
       if (item.ind.farolCsDetalhe) cs.title = item.ind.farolCsDetalhe;
       card.append(cs);
     }
-    grade.append(card);
+    return card;
+  }
 
-    if (posicao) {
-      const cardPosicao = criar('article', 'tile tile--largo');
-      cardPosicao.append(criar('h3', 'tile__rotulo', `Posição entre as lojas ${posicao.modelo}`));
-      const tabela = criar('table', 'tabela tabela--compacta');
-      const corpo = tabela.createTBody();
-      for (const l of posicao.linhas) {
-        const tr = corpo.insertRow();
-        const nome = criar('th', '', l.nome);
-        nome.scope = 'row';
-        tr.append(nome);
-        celula(tr, l.valor);
-        celula(tr, `${l.posicao}º de ${l.total}`);
-        tr.insertCell().append(status(l.classe, l.faixa));
+  function cardDistribuicao(titulo, valor, partes, nota) {
+    const card = criar('article', 'tile');
+    card.append(criar('h3', 'tile__rotulo', titulo));
+    card.append(criar('p', 'tile__valor', valor));
+    card.append(composicao(partes));
+    if (nota) card.append(linha(nota));
+    return card;
+  }
+
+  function cardPosicao(posicao) {
+    const card = criar('article', 'tile tile--inteiro');
+    card.append(criar('h3', 'tile__rotulo', `Posição entre as lojas ${posicao.modelo}`));
+    const tabela = criar('table', 'tabela tabela--compacta');
+    const corpo = tabela.createTBody();
+    for (const l of posicao.linhas) {
+      const tr = corpo.insertRow();
+      const nome = criar('th', '', l.nome);
+      nome.scope = 'row';
+      tr.append(nome);
+      celula(tr, l.valor);
+      celula(tr, `${l.posicao}º de ${l.total}`);
+      tr.insertCell().append(status(l.classe, l.faixa));
+    }
+    card.append(tabela);
+    return card;
+  }
+
+  // Topo da página: saúde, NPS e farol de CS lado a lado
+  function secaoDiagnostico(total, porLoja, ctx) {
+    const todas = ctx.loja === TODAS;
+    const secao = novaSecao({
+      sobretitulo: 'Diagnóstico',
+      titulo: todas ? 'Visão geral das lojas' : 'Saúde e satisfação',
+      nota: 'Saúde combina vendas vs meta, OTD, ruptura, avaria e NPS (quando há base). Os limites de ruptura, avaria e NPS são pontos de partida e podem ser ajustados.',
+    }, ctx);
+    const grade = criar('div', 'secao__grade');
+
+    if (todas) {
+      const saudes = N.contar(porLoja, x => (x.saude.classe === 'neutro' ? null : x.saude.classe));
+      const comSaude = (saudes.bom ?? 0) + (saudes.alerta ?? 0) + (saudes.ruim ?? 0);
+      grade.append(cardDistribuicao('Saúde das lojas', `${fmt.inteiro.format(saudes.ruim ?? 0)} críticas`, [
+        { rotulo: 'Saudável', valor: saudes.bom ?? 0, classe: 'bom' },
+        { rotulo: 'Atenção', valor: saudes.alerta ?? 0, classe: 'alerta' },
+        { rotulo: 'Crítica', valor: saudes.ruim ?? 0, classe: 'ruim' },
+      ], `de ${fmt.inteiro.format(comSaude)} lojas com dados suficientes`));
+      grade.append(cardNps(total, ctx));
+      const faroes = N.contar(porLoja, x => x.ind.farolCs);
+      const divergentes = porLoja.filter(x => x.ind.farolCs === 'Feliz' && x.saude.classe === 'ruim').length;
+      if (Object.keys(faroes).length) {
+        grade.append(cardDistribuicao('Farol de CS (manual)', `${fmt.inteiro.format(faroes.Churn ?? 0)} em churn`, [
+          { rotulo: 'Feliz', valor: faroes.Feliz ?? 0, classe: 'bom' },
+          { rotulo: 'Atenção', valor: faroes['Atenção'] ?? 0, classe: 'alerta' },
+          { rotulo: 'Churn', valor: faroes.Churn ?? 0, classe: 'ruim' },
+        ], divergentes ? `${divergentes} lojas "Feliz" estão com saúde crítica nos dados` : null));
       }
-      cardPosicao.append(tabela);
-      grade.append(cardPosicao);
+    } else {
+      const item = porLoja.find(x => x.loja === ctx.loja);
+      if (item && item.saude.componentes.length) grade.append(cardSaudeLoja(item));
+      grade.append(cardNps(total, ctx));
+      const posicao = item ? N.posicaoRelativa(ctx.loja, porLoja, item.modelo) : null;
+      if (posicao) grade.append(cardPosicao(posicao));
     }
     secao.append(grade);
+    return secao;
+  }
+
+  function secaoPlano(recs, ctx) {
+    const todas = ctx.loja === TODAS;
+    const secao = novaSecao({
+      sobretitulo: 'O que fazer',
+      titulo: 'Plano de ação',
+      nota: todas
+        ? 'As sugestões com mais valor em jogo entre todas as lojas (até 3 por área). Clique na loja para ver o plano completo dela. As regras apontam onde olhar a partir dos números; a causa precisa ser confirmada.'
+        : 'Sugestões desta loja, das de maior valor em jogo para as demais. As regras apontam onde olhar a partir dos números; a causa precisa ser confirmada.',
+    }, ctx);
+    if (!recs.length) {
+      secao.append(criar('p', 'secao__nota', 'Nenhuma regra disparou para esta seleção.'));
+      return secao;
+    }
+    const lista = criar('div', 'plano');
+    for (const r of recs) {
+      const acao = criar('article', 'acao');
+      const topo = criar('div', 'acao__topo');
+      topo.append(criar('span', 'acao__area', r.area));
+      if (todas) {
+        const botao = criar('button', 'link-loja acao__loja', r.loja);
+        botao.type = 'button';
+        botao.addEventListener('click', () => selecionarLoja(r.loja));
+        topo.append(botao);
+      }
+      acao.append(topo);
+      acao.append(criar('h3', 'acao__titulo', r.titulo));
+      acao.append(criar('p', 'acao__evidencia', r.evidencia));
+      if (r.impacto != null) acao.append(criar('p', 'acao__impacto', `≈ ${reais(r.impacto)} em jogo`));
+      lista.append(acao);
+    }
+    secao.append(lista);
     return secao;
   }
 
@@ -463,14 +563,12 @@
 
     el('periodo').textContent = `Mês corrente: ${N.intervalo(base.periodo.atual)} · comparado com ${N.intervalo(periodoComparacao(ctx))} (${N.COMPARACOES[ctx.comparacao].curto})`;
 
-    const secoes = [secaoResumo(total, porLoja, alertas, ctx)];
+    const secoes = [
+      secaoDiagnostico(total, porLoja, ctx),
+      secaoResumo(total, porLoja, alertas, ctx),
+      secaoPlano(N.recomendacoes(porLoja, base, ctx, todas ? null : ctx.loja), ctx),
+    ];
     if (todas && alertas.length) secoes.push(secaoAlertas(alertas, ctx));
-    if (!todas) {
-      const item = porLoja.find(x => x.loja === ctx.loja);
-      if (item && item.saude.componentes.length) {
-        secoes.push(secaoSaude(item, N.posicaoRelativa(ctx.loja, porLoja, item.modelo), ctx));
-      }
-    }
     secoes.push(secaoCards(SECAO_VENDAS, total, ctx, { faixa }));
     if (total.venda.atual.pedidos) secoes.push(secaoCards(SECAO_DECOMPOSICAO, total, ctx));
     // Só "Sem informação" (ex.: GMV lançado manualmente) não diz nada sobre mix
@@ -479,7 +577,6 @@
     if (total.growth.sessoes != null) secoes.push(secaoCards(SECAO_GROWTH, total, ctx));
     secoes.push(secaoCards(SECAO_ESTOQUE, total, ctx));
     secoes.push(secaoCards(SECAO_OTD, total, ctx));
-    if (total.nps.respostas) secoes.push(secaoCards(SECAO_NPS, total, ctx));
 
     el('secoes').replaceChildren(...secoes);
   }

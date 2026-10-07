@@ -55,6 +55,8 @@ const LOJAS = [
 
 // Farol manual do CS e última integração de estoque (padrão: dia da exportação)
 const CS = { 'Loja exemplo A': 'Feliz', 'Loja exemplo B': 'Atenção', 'Loja exemplo C': 'Atenção', 'Loja exemplo E': 'Feliz', 'Loja exemplo F': 'Feliz', 'Loja exemplo G': 'Churn', 'Loja exemplo H': 'Feliz' };
+// Desconto médio [atual, anterior] onde a origem informa (na base real, poucas lojas)
+const DESCONTO = { 'Loja exemplo A': [0.08, 0.06], 'Loja exemplo E': [0.05, 0.09] };
 const INTEGRACAO = { 'Loja exemplo G': '2026-10-02' };
 
 const lojas = [];
@@ -97,6 +99,14 @@ for (const p of LOJAS) {
       gmv_forecast: arred(forecast), gmv_budget: arred(forecast && forecast * p.budget),
       gmv_forecast_mes: arred(forecastMes), gmv_budget_mes: arred(forecastMes && forecastMes * p.budget),
     });
+    if (DESCONTO[p.loja]) {
+      const [atual, anterior] = DESCONTO[p.loja];
+      Object.assign(l, {
+        desconto_atual: arred(gmvAtual * atual / (1 - atual)),
+        desconto_anterior: arred(gmvAnterior * anterior / (1 - anterior)),
+        desconto_alinhado: arred(gmvAlinhado * anterior / (1 - anterior)),
+      });
+    }
     if (p.ser) {
       const serAtual = gmvAtual * p.ser;
       const serForecast = serAtual / p.serAting;

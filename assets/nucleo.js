@@ -127,6 +127,7 @@
     const gmv = num(d[`gmv_${sufixo}`]);
     const pedidos = num(d[`pedidos_${sufixo}`]);
     const itens = num(d[`itens_${sufixo}`]);
+    const desconto = num(d[`desconto_${sufixo}`]);
     return {
       gmv,
       pedidos,
@@ -134,6 +135,8 @@
       ticket: razao(gmv, pedidos),
       itensPorPedido: razao(itens, pedidos),
       precoItem: razao(gmv, itens),
+      // Desconto zerado quase sempre é "não informado" na origem: só vale quando há valor
+      descontoPct: desconto > 0 && gmv ? desconto / (gmv + desconto) : null,
     };
   }
 
@@ -162,12 +165,15 @@
       },
       otd: {
         entregues: num(d.otd_entregues_atual),
+        noPrazo: num(d.otd_no_prazo_atual),
         entreguesAnterior: num(d[`otd_entregues_${ctx.comparacao}`]),
         atual: razao(num(d.otd_no_prazo_atual), num(d.otd_entregues_atual)),
         anterior: razao(num(d[`otd_no_prazo_${ctx.comparacao}`]), num(d[`otd_entregues_${ctx.comparacao}`])),
       },
       nps: {
         respostas: num(d.nps_respostas_atual),
+        promotores: num(d.nps_promotores_atual),
+        detratores: num(d.nps_detratores_atual),
         atual: npsDe(d, 'atual'),
         // Janela móvel de 90 dias contra os 90 anteriores, independente da comparação escolhida
         anterior: npsDe(d, 'anterior'),
@@ -566,10 +572,239 @@
     return itens;
   }
 
+  // ---------------------------------------------------------------------------
+  // NPS: zonas usuais de mercado
+
+  function zonaNps(nps) {
+    if (nps == null) return null;
+    if (nps >= 75) return { classe: 'bom', rotulo: 'Excelência' };
+    if (nps >= 50) return { classe: 'bom', rotulo: 'Qualidade' };
+    if (nps >= 0) return { classe: 'alerta', rotulo: 'Aperfeiçoamento' };
+    return { classe: 'ruim', rotulo: 'Crítica' };
+  }
+
+  function contar(itens, chave) {
+    const mapa = {};
+    for (const x of itens) {
+      const k = chave(x);
+      if (k != null) mapa[k] = (mapa[k] ?? 0) + 1;
+    }
+    return mapa;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Plano de ação: regras que transformam os números em sugestões, com a evidência e,
+  // quando dá para estimar, o valor em jogo. São pontos de partida para investigar,
+  // não conclusões: a regra vê o sintoma, não a causa.
+
+  const ACAO = {
+    quedaCanal: -0.15, // canal caindo mais que isso vs comparação
+    altaCanal: 0.20,
+    valorMinimo: 20000, // R$ de variação no canal para a sugestão valer
+    parcelaPares: 0.10, // parcela média do canal nas lojas parecidas para sugerir entrada
+    paresMinimos: 3,
+    quedaVolume: -0.10, // pedidos
+    quedaTicket: -0.10,
+    estavel: 0.03, // variação tratada como estável no outro fator
+    quedaSessoes: -0.15,
+    altaSessoes: 0.20, // acima disso, queda de conversão vira "tráfego novo de baixa intenção"
+    quedaConversao: -0.15, // relativa
+    paradoMinimo: 0.5, // parcela do estoque parado
+    itensParadosMinimo: 1000,
+    npsQueda: -10, // pontos vs os 90 dias anteriores
+    maximoGeral: 10, // sugestões na visão de todas as lojas
+    maximoPorArea: 3, // na visão geral, para a lista não virar só uma área
+  };
+
+  // Parcela média de cada canal nas lojas de um mesmo modelo de negócio (loja sem o canal conta 0)
+  function referenciaCanais(base, porLoja) {
+    const lojasPorModelo = new Map();
+    for (const x of porLoja) {
+      if (!x.modelo || !(x.ind.gmv.real > 0)) continue;
+      lojasPorModelo.set(x.modelo, [...(lojasPorModelo.get(x.modelo) ?? []), x.loja]);
+    }
+    const totais = new Map();
+    for (const l of base.canais ?? []) totais.set(l.loja, (totais.get(l.loja) ?? 0) + (num(l.gmv_atual) ?? 0));
+    const parcelasPorLoja = new Map();
+    for (const l of base.canais ?? []) {
+      const total = totais.get(l.loja);
+      if (!total) continue;
+      const parcelas = parcelasPorLoja.get(l.loja) ?? new Map();
+      parcelas.set(l.canal, (parcelas.get(l.canal) ?? 0) + (num(l.gmv_atual) ?? 0) / total);
+      parcelasPorLoja.set(l.loja, parcelas);
+    }
+    const referencia = new Map();
+    for (const [modelo, lojas] of lojasPorModelo) {
+      const soma = new Map();
+      const presenca = new Map();
+      for (const loja of lojas) {
+        for (const [canal, parcela] of parcelasPorLoja.get(loja) ?? []) {
+          soma.set(canal, (soma.get(canal) ?? 0) + parcela);
+          if (parcela > 0) presenca.set(canal, (presenca.get(canal) ?? 0) + 1);
+        }
+      }
+      const porCanal = new Map();
+      for (const [canal, s] of soma) porCanal.set(canal, { media: s / lojas.length, lojas: presenca.get(canal) ?? 0, total: lojas.length });
+      referencia.set(modelo, porCanal);
+    }
+    return { referencia, parcelasPorLoja };
+  }
+
+  const nomeCanal = canal => (canal === 'Site próprio' ? 'no site próprio' : `no canal ${canal}`);
+
+  function recomendacoesLoja(item, base, ctx, refCanais) {
+    const { loja, modelo, ind } = item;
+    const comparacao = COMPARACOES[ctx.comparacao].curto;
+    const meta = nomeMeta(ctx).toLowerCase();
+    const recs = [];
+    const add = (area, titulo, evidencia, impacto = null) => recs.push({ loja, area, titulo, evidencia, impacto });
+
+    // Meta: quanto precisa vender por dia útil para fechar o mês
+    const s = ind.gmv;
+    // Abaixo de 10% da meta é caso de alerta de dado, não de acelerar vendas
+    if (s.projecao != null && s.metaMes && s.projecao < s.metaMes * 0.97 && s.atingimento >= ANOMALIA.queda) {
+      const serie = serieDiaria(base.diario ?? [], new Set([loja]));
+      const campo = `gmv_${ctx.meta}`;
+      const diasPassados = serie.filter(d => d.dia <= base.data_ref && num(d[campo]) > 0).length;
+      const diasRestantes = serie.filter(d => d.dia > base.data_ref && num(d[campo]) > 0).length;
+      if (diasPassados && diasRestantes) {
+        const faltam = s.metaMes - (s.real ?? 0);
+        const necessario = faltam / diasRestantes;
+        const ritmo = (s.real ?? 0) / diasPassados;
+        const multiplo = ritmo > 0 ? necessario / ritmo : null;
+        const comparativo = multiplo == null ? ''
+          : multiplo >= 2 ? `, ${fmt.decimal.format(multiplo)} vezes o ritmo de agora (${reais(ritmo)}). Com essa distância, vale revisar a meta ou montar um plano de choque`
+            : `, ${fmt.variacao.format(multiplo - 1)} acima do ritmo de agora (${reais(ritmo)})`;
+        add('Meta', `Acelerar para fechar o ${meta}`,
+          `No ritmo atual o mês fecha em ${reais(s.projecao)}, ${reais(s.metaMes - s.projecao)} abaixo do ${meta}. Faltam ${reais(faltam)} em ${diasRestantes} dias úteis: ${reais(necessario)} por dia útil${comparativo}.`,
+          s.metaMes - s.projecao);
+      }
+    }
+
+    // Canais: o que caiu, o que acelera e onde as lojas parecidas vendem e esta não
+    const canaisLoja = canais(base.canais ?? [], new Set([loja]), ctx, Infinity).itens;
+    const totalAnteriorLoja = canaisLoja.reduce((a, c) => a + c.anterior, 0);
+    for (const c of canaisLoja) {
+      if (c.canal === 'Sem informação' || !c.anterior) continue;
+      const delta = c.atual - c.anterior;
+      if (c.variacao <= ACAO.quedaCanal && -delta >= ACAO.valorMinimo) {
+        add('Canais', `Recuperar vendas ${nomeCanal(c.canal)}`,
+          `${c.canal} caiu ${fmt.variacao.format(c.variacao)} vs ${comparacao} (${reais(delta, true)}) e passou de ${fmt.pct0.format(c.anterior / totalAnteriorLoja)} para ${fmt.pct0.format(c.parcela)} das vendas da loja. Vale checar ruptura, preço, buy box e visibilidade nesse canal.`,
+          -delta);
+      } else if (c.variacao >= ACAO.altaCanal && delta >= ACAO.valorMinimo) {
+        add('Canais', `Acelerar ${nomeCanal(c.canal).replace(/^no /, 'o ')}`,
+          `${c.canal} cresceu ${fmt.variacao.format(c.variacao)} vs ${comparacao} (${reais(delta, true)}) e já é ${fmt.pct0.format(c.parcela)} das vendas da loja. O canal está respondendo: ampliar sortimento, estoque dedicado e investimento ali.`,
+          delta);
+      }
+    }
+    const ref = modelo ? refCanais.referencia.get(modelo) : null;
+    if (ref && (s.real ?? 0) > 0) {
+      const minhas = refCanais.parcelasPorLoja.get(loja) ?? new Map();
+      const candidatos = [...ref.entries()]
+        .filter(([canal, r]) => canal !== 'Sem informação' && canal !== 'Site próprio' && r.total >= ACAO.paresMinimos
+          && r.media >= ACAO.parcelaPares && !((minhas.get(canal) ?? 0) > 0.01))
+        .sort((a, b) => b[1].media - a[1].media)
+        .slice(0, 2);
+      for (const [canal, r] of candidatos) {
+        add('Canais', `Avaliar entrada no canal ${canal}`,
+          `Nas lojas ${modelo} com venda, o canal ${canal} responde em média por ${fmt.pct0.format(r.media)} do GMV (${r.lojas} de ${r.total} lojas vendem lá). Esta loja não vende nesse canal.`);
+      }
+    }
+
+    // Volume x ticket: onde promoção, cupom e CRM ajudam
+    const dec = decomposicao(ind);
+    if (dec) {
+      const { atual, anterior } = ind.venda;
+      const desconto = atual.descontoPct != null && anterior.descontoPct != null
+        ? ` O desconto médio foi de ${fmt.pct1.format(anterior.descontoPct)} para ${fmt.pct1.format(atual.descontoPct)}.` : '';
+      if (dec.pedidos <= ACAO.quedaVolume && dec.ticket > -ACAO.estavel) {
+        add('Promoções', 'Recuperar volume de pedidos',
+          `Pedidos ${fmt.variacao.format(dec.pedidos)} vs ${comparacao} com ticket médio ${fmt.variacao.format(dec.ticket)}: a queda é de volume, não de preço.${desconto} Promoção, cupom ou campanha de CRM atacam direto o volume.`,
+          (anterior.pedidos - atual.pedidos) * atual.ticket);
+      } else if (dec.ticket <= ACAO.quedaTicket && dec.pedidos > -ACAO.estavel) {
+        const causa = dec.itensPorPedido < dec.precoItem ? 'menos itens por pedido' : 'preço médio por item menor';
+        add('Promoções', 'Proteger o ticket médio',
+          `Ticket médio ${fmt.variacao.format(dec.ticket)} vs ${comparacao} com volume estável, puxado por ${causa}.${desconto} Revisar a intensidade de desconto e testar kits, combos ou frete grátis a partir de um valor mínimo.`,
+          (anterior.ticket - atual.ticket) * atual.pedidos);
+      }
+    }
+
+    // Estoque (só lojas que ainda integram)
+    const e = ind.estoque;
+    const ativo = !e.ultimaIntegracao || diasEntre(e.ultimaIntegracao, base.data_ref) <= ANOMALIA.diasIntegracao[1];
+    if (ativo && e.skusRuptura && (e.skusRupturaA || (e.vendaRiscoDia ?? 0) >= 1000)) {
+      const diasMes = base.periodo.mes ? diasEntre(base.data_ref, base.periodo.mes.fim) : 0;
+      const risco = e.vendaRiscoDia
+        ? ` Cerca de ${reais(e.vendaRiscoDia)} por dia em venda que não acontece${diasMes > 0 ? `, ${reais(e.vendaRiscoDia * diasMes)} até o fim do mês` : ''}.` : '';
+      add('Estoque', 'Repor SKUs em ruptura',
+        `${fmt.inteiro.format(e.skusRuptura)} SKUs com venda estão sem estoque${e.skusRupturaA ? ` (${fmt.inteiro.format(e.skusRupturaA)} da curva A)` : ''}.${risco}${e.skusRisco ? ` Outros ${fmt.inteiro.format(e.skusRisco)} estão em risco de ruptura: antecipar a compra.` : ''}`,
+        e.vendaRiscoDia && diasMes > 0 ? e.vendaRiscoDia * diasMes : null);
+    }
+    const parados = e.disponiveis != null && e.paradoPct != null ? e.disponiveis * e.paradoPct : 0;
+    if (ativo && e.paradoPct >= ACAO.paradoMinimo && parados >= ACAO.itensParadosMinimo) {
+      add('Promoções', 'Girar o estoque parado',
+        `${fmt.pct0.format(e.paradoPct)} do estoque disponível (${fmt.compacto.format(parados)} itens) está em SKUs sem venda nos últimos 90 dias. São candidatos a promoção, kit com itens de giro ou liquidação, liberando capital e espaço.`);
+    }
+
+    // Growth (GA até D-2; valor estimado com o ticket médio da loja)
+    const g = ind.growth;
+    if (g.sessoes != null && g.sessoesAnterior) {
+      const varSessoes = g.sessoes / g.sessoesAnterior - 1;
+      const ticket = ind.venda.atual.ticket;
+      if (varSessoes <= ACAO.quedaSessoes) {
+        add('Growth', 'Recuperar tráfego',
+          `Sessões ${fmt.variacao.format(varSessoes)} vs ${comparacao} (até D-2). Reforçar mídia paga, CRM (e-mail, push, WhatsApp) e as fontes de tráfego que mais caíram.`,
+          g.conversaoAnterior != null && ticket ? (g.sessoesAnterior - g.sessoes) * g.conversaoAnterior * ticket : null);
+      } else if (g.conversao != null && g.conversaoAnterior && g.conversao / g.conversaoAnterior - 1 <= ACAO.quedaConversao) {
+        const perdaTransacoes = (g.transacoesAnterior ?? 0) - (g.transacoes ?? 0);
+        if (varSessoes >= ACAO.altaSessoes) {
+          // Mais tráfego e menos conversão: o tráfego novo é de baixa intenção
+          add('Growth', 'Qualificar o tráfego novo',
+            `Sessões ${fmt.variacao.format(varSessoes)} vs ${comparacao} (até D-2), mas a conversão caiu de ${fmt.pct.format(g.conversaoAnterior)} para ${fmt.pct.format(g.conversao)} e as transações foram de ${fmt.inteiro.format(g.transacoesAnterior)} para ${fmt.inteiro.format(g.transacoes)}. O tráfego a mais converte pouco: rever as campanhas e fontes que trouxeram o aumento.`,
+            perdaTransacoes > 0 && ticket ? perdaTransacoes * ticket : null);
+        } else {
+          add('Growth', 'Investigar a queda de conversão',
+            `Conversão de ${fmt.pct.format(g.conversaoAnterior)} para ${fmt.pct.format(g.conversao)} com tráfego ${fmt.variacao.format(varSessoes)} vs ${comparacao} (até D-2). Revisar preço, frete, ruptura dos produtos mais vistos e o checkout.`,
+            ticket ? g.sessoes * (g.conversaoAnterior - g.conversao) * ticket : null);
+        }
+      }
+    }
+
+    // Operação e clientes
+    const o = ind.otd;
+    if ((o.entregues ?? 0) >= BASE_MINIMA_OTD && o.atual != null && o.atual < META_OTD && o.atual >= ANOMALIA.otdMinimo) {
+      add('Operação', 'Atacar atrasos de entrega',
+        `OTD de ${fmt.pct.format(o.atual)} (meta ${fmt.pct0.format(META_OTD)}): ${fmt.inteiro.format(o.entregues - (o.noPrazo ?? 0))} pedidos entregues fora do prazo no período. Cruzar com transportadora e região no dashboard OTD B2C.`);
+    }
+    const n = ind.nps;
+    if ((n.respostas ?? 0) >= BASE_MINIMA_NPS && n.atual != null) {
+      const queda = n.anterior != null ? n.atual - n.anterior : null;
+      if (n.atual < SAUDE.nps.bom || (queda != null && queda <= ACAO.npsQueda)) {
+        add('Clientes', 'Olhar os detratores',
+          `NPS ${fmt.inteiro.format(n.atual)} (${zonaNps(n.atual).rotulo.toLowerCase()})${queda != null ? `, ${fmt.inteiroSinal.format(queda)} pontos vs os 90 dias anteriores` : ''}: ${fmt.inteiro.format(n.detratores ?? 0)} detratores em ${fmt.inteiro.format(n.respostas)} respostas. Os comentários deles costumam apontar se o problema é entrega, produto ou atendimento.`);
+      }
+    }
+    return recs;
+  }
+
+  // loja: sugestões só dela (todas). Sem loja: as de maior valor em jogo entre todas as lojas.
+  function recomendacoes(porLoja, base, ctx, loja = null) {
+    const refCanais = referenciaCanais(base, porLoja);
+    const alvo = loja ? porLoja.filter(x => x.loja === loja) : porLoja;
+    const lista = alvo.flatMap(x => recomendacoesLoja(x, base, ctx, refCanais));
+    lista.sort((a, b) => (b.impacto ?? -1) - (a.impacto ?? -1));
+    if (loja) return lista;
+    const porArea = {};
+    return lista
+      .filter(r => r.impacto != null && (porArea[r.area] = (porArea[r.area] ?? 0) + 1) <= ACAO.maximoPorArea)
+      .slice(0, ACAO.maximoGeral);
+  }
+
   globalThis.Nucleo = {
-    METAS, COMPARACOES, META_OTD, BASE_MINIMA_OTD, SAUDE,
+    METAS, COMPARACOES, META_OTD, BASE_MINIMA_OTD, BASE_MINIMA_NPS, SAUDE,
     fmt, reais, num, razao, nomeMeta, juntar, dataCurta, intervalo,
     somar, enriquecer, indicadores, farol, decomposicao, faixaProjecao, serieDiaria,
     canais, saude, posicaoRelativa, anomalias, destaquesGerais, destaquesLoja,
+    zonaNps, contar, recomendacoes,
   };
 })();
