@@ -433,6 +433,14 @@ body {
 .acao__evidencia { margin: 0; color: var(--texto-2); font-size: 13px; }
 .acao__impacto { margin: auto 0 0; color: var(--texto); font-size: 13px; font-weight: 600; }
 
+/* Promoções que mais venderam: nome longo corta com reticências (nome completo no title) */
+.promocao__nome {
+  max-width: 360px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.tabela-envoltorio--plano { margin-top: 8px; background: none; border: 0; border-radius: 0; }
+
 /* Tabela "onde agir" */
 .tabela-envoltorio {
   margin-top: 24px;

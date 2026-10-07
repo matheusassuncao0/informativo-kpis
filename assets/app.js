@@ -65,7 +65,8 @@
       : tile.formato === 'nps' ? `${fmt.inteiroSinal.format(diferenca)} ${Math.round(Math.abs(diferenca)) === 1 ? 'ponto' : 'pontos'}`
         : fmt.variacao.format(atual / anterior - 1);
     const subiu = diferenca > 0;
-    const classe = diferenca === 0 ? 'delta--neutro'
+    // melhor: 'neutro' = mudança sem juízo de bom ou ruim (ex.: mais desconto)
+    const classe = diferenca === 0 || tile.melhor === 'neutro' ? 'delta--neutro'
       : (subiu === (tile.melhor === 'alta') ? 'delta--bom' : 'delta--ruim');
     const seta = diferenca === 0 ? '■' : (subiu ? '▲' : '▼');
     const referencia = tile.rotuloComparacao ? resolver(tile.rotuloComparacao, ctx) : N.intervalo(periodoComparacao(ctx));
@@ -174,6 +175,24 @@
     ],
   };
 
+  // Promoções: fonte própria (VTEX flagship Brasil), comparada só com ela mesma
+  const MES_ANTERIOR = 'mesmo período do mês anterior';
+  const SECAO_PROMO = {
+    sobretitulo: 'Promoções · VTEX',
+    titulo: 'Promoções',
+    nota: 'Fonte própria: promoções da VTEX, só lojas flagship VTEX Brasil, com o valor captado recortado pela data da NF. Não compare com o GMV das seções acima; compare a loja com ela mesma (há lojas que fazem tabela de preço via promoção). Brindes e marcadores sem desconto ficam de fora; frete grátis e desconto de marketplace não aparecem. Comparação sempre com o mesmo período do mês anterior.',
+    tiles: [
+      { rotulo: 'Pedidos com promoção (%)', atual: i => i.promo.atual?.pctPedidos, anterior: i => i.promo.anterior?.pctPedidos, formato: 'pct', melhor: 'neutro', rotuloComparacao: MES_ANTERIOR,
+        nota: i => (i.promo.atual ? `${fmt.inteiro.format(i.promo.atual.pedidosCom)} de ${fmt.inteiro.format(i.promo.atual.pedidos)} pedidos · ${fmt.pct0.format(i.promo.atual.pctGmv)} do GMV na VTEX` : null) },
+      { rotulo: 'Desconto concedido (R$)', atual: i => i.promo.atual?.desconto, anterior: i => i.promo.anterior?.desconto, formato: 'inteiro', melhor: 'neutro', rotuloComparacao: MES_ANTERIOR,
+        nota: i => (i.promo.atual?.investimento != null ? `${fmt.pct1.format(i.promo.atual.investimento)} do GMV na VTEX` : null) },
+      { rotulo: 'Desconto médio (%)', atual: i => i.promo.atual?.taxaDesconto, anterior: i => i.promo.anterior?.taxaDesconto, formato: 'pct', melhor: 'neutro', rotuloComparacao: MES_ANTERIOR,
+        nota: () => 'Sobre o preço cheio dos itens em promoção' },
+      { rotulo: 'Ticket com promoção (R$)', atual: i => i.promo.atual?.ticketCom, anterior: i => i.promo.anterior?.ticketCom, formato: 'inteiro', melhor: 'alta', rotuloComparacao: MES_ANTERIOR,
+        nota: i => (i.promo.atual?.ticketSem != null ? `Sem promoção: ${reais(i.promo.atual.ticketSem)}` : null) },
+    ],
+  };
+
   const comparacaoGrowth = ctx => `${N.COMPARACOES[ctx.comparacao].curto} (até D-2)`;
 
   const SECAO_GROWTH = {
@@ -269,6 +288,54 @@
   }
 
   // Mix de canais: barras horizontais de uma cor; "Sem informação" e "Outros" em cinza
+  // Promoções que mais venderam: por loja, as 5 dela; na visão geral, as maiores entre todas
+  function cardTopPromocoes(linhas, todas) {
+    const card = criar('article', 'tile tile--inteiro');
+    card.append(criar('h3', 'tile__rotulo', todas ? 'Promoções que mais venderam (todas as lojas)' : 'Promoções que mais venderam'));
+    const tabela = criar('table', 'tabela tabela--compacta');
+    const cabecalho = tabela.createTHead().insertRow();
+    const colunas = [['Promoção', ''], ...(todas ? [['Loja', '']] : []), ['Tipo', ''], ['Pedidos (qtd.)', 'num'], ['GMV rateado (R$)', 'num'], ['Desconto (R$)', 'num'], ['GMV vs mês anterior (%)', 'num']];
+    for (const [texto, classe] of colunas) {
+      const th = criar('th', classe, texto);
+      th.scope = 'col';
+      cabecalho.append(th);
+    }
+    const corpo = tabela.createTBody();
+    for (const p of linhas) {
+      const tr = corpo.insertRow();
+      const nome = criar('th', 'promocao__nome', p.promocao);
+      nome.scope = 'row';
+      nome.title = p.promocao;
+      tr.append(nome);
+      if (todas) celula(tr, p.loja, '');
+      celula(tr, p.brinde ? 'Brinde' : p.tipo ?? '—', '');
+      celula(tr, fmt.inteiro.format(p.pedidos_atual ?? 0));
+      celula(tr, fmt.inteiro.format(p.gmv_atual ?? 0));
+      celula(tr, fmt.inteiro.format(p.desconto_atual ?? 0));
+      celula(tr, p.gmv_anterior ? fmt.variacao.format(p.gmv_atual / p.gmv_anterior - 1) : 'nova');
+    }
+    const envoltorio = criar('div', 'tabela-envoltorio tabela-envoltorio--plano');
+    envoltorio.append(tabela);
+    card.append(envoltorio);
+    return card;
+  }
+
+  function secaoPromocoes(total, ctx) {
+    const todas = ctx.loja === TODAS;
+    const secao = secaoCards(SECAO_PROMO, total, ctx);
+    const pa = total.promo.atual;
+    const pb = total.promo.anterior;
+    if (pa && !pa.pedidosCom && !(pb?.pedidosCom) && pa.pedidos >= 500) {
+      secao.querySelector('.secao__nota').after(criar('p', 'secao__nota', 'Nenhuma promoção registrada na VTEX nos dois períodos, mesmo com muitos pedidos: costuma ser falta de captura na origem, não ausência de promoção.'));
+    }
+    const linhas = (estado.base.promocoes_top ?? [])
+      .filter(p => todas || p.loja === ctx.loja)
+      .sort((a, b) => (b.gmv_atual ?? 0) - (a.gmv_atual ?? 0))
+      .slice(0, todas ? 8 : 5);
+    if (linhas.length) secao.querySelector('.secao__grade').append(cardTopPromocoes(linhas, todas));
+    return secao;
+  }
+
   function secaoCanais(resumo, ctx) {
     const secao = novaSecao({
       sobretitulo: 'De onde vem o GMV',
@@ -573,6 +640,7 @@
     if (total.venda.atual.pedidos) secoes.push(secaoCards(SECAO_DECOMPOSICAO, total, ctx));
     // Só "Sem informação" (ex.: GMV lançado manualmente) não diz nada sobre mix
     if (resumoCanais.itens.length && resumoCanais.semCanal < 0.999) secoes.push(secaoCanais(resumoCanais, ctx));
+    if (total.promo.atual) secoes.push(secaoPromocoes(total, ctx));
     if (todas) secoes.push(secaoTabela(porLoja, ctx));
     if (total.growth.sessoes != null) secoes.push(secaoCards(SECAO_GROWTH, total, ctx));
     secoes.push(secaoCards(SECAO_ESTOQUE, total, ctx));

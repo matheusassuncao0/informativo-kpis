@@ -16,8 +16,10 @@ const CONSULTAS = [
   { nome: 'nps', destino: 'lojas' },
   { nome: 'farol_cs', destino: 'lojas' },
   { nome: 'growth', destino: 'lojas' },
+  { nome: 'promocoes', destino: 'lojas' },
   { nome: 'vendas_canal', destino: 'canais' },
   { nome: 'vendas_diario', destino: 'diario' },
+  { nome: 'promocoes_top', destino: 'promocoes_top' },
   { nome: 'frescor', destino: 'frescor' },
 ];
 

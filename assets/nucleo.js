@@ -140,6 +140,34 @@
     };
   }
 
+  // Promoções (fonte própria: VTEX flagship Brasil, valor captado). Só razões dentro dela.
+  function periodoPromo(d, sufixo) {
+    const gmvCom = num(d[`promo_gmv_com_${sufixo}`]) ?? 0;
+    const gmvSem = num(d[`promo_gmv_sem_${sufixo}`]) ?? 0;
+    const pedidosCom = num(d[`promo_pedidos_com_${sufixo}`]) ?? 0;
+    const pedidosSem = num(d[`promo_pedidos_sem_${sufixo}`]) ?? 0;
+    const gmvItens = num(d[`promo_gmv_itens_${sufixo}`]) ?? 0;
+    const desconto = num(d[`promo_desconto_${sufixo}`]) ?? 0;
+    const gmv = gmvCom + gmvSem;
+    const pedidos = pedidosCom + pedidosSem;
+    if (!pedidos) return null;
+    return {
+      gmv,
+      pedidos,
+      gmvCom,
+      pedidosCom,
+      desconto,
+      pctGmv: razao(gmvCom, gmv),
+      pctPedidos: pedidosCom / pedidos,
+      // desconto ÷ preço cheio dos itens promocionados
+      taxaDesconto: gmvItens + desconto > 0 ? desconto / (gmvItens + desconto) : null,
+      investimento: razao(desconto, gmv),
+      ticketCom: razao(gmvCom, pedidosCom),
+      ticketSem: razao(gmvSem, pedidosSem),
+      pedidosCupom: num(d[`promo_pedidos_cupom_${sufixo}`]) ?? 0,
+    };
+  }
+
   function indicadores(d, ctx) {
     const disponiveis = num(d.itens_disponiveis);
     const avaria = num(d.itens_avaria);
@@ -186,6 +214,8 @@
         conversao: razao(num(d.transacoes_atual), num(d.sessoes_atual)),
         conversaoAnterior: razao(num(d[`transacoes_${ctx.comparacao}`]), num(d[`sessoes_${ctx.comparacao}`])),
       },
+      // Sempre contra o mesmo período do mês anterior: a fonte não tem o período alinhado
+      promo: { atual: periodoPromo(d, 'atual'), anterior: periodoPromo(d, 'anterior') },
       farolCs: typeof d.farol_cs === 'string' ? d.farol_cs : null,
       farolCsDetalhe: typeof d.farol_cs_detalhe === 'string' ? d.farol_cs_detalhe : null,
     };
@@ -522,6 +552,17 @@
       itens.push({ tom, texto });
     }
 
+    const pa = total.promo.atual;
+    const pb = total.promo.anterior;
+    if (pa && pa.pedidosCom) {
+      const lojasPromo = porLoja.filter(x => x.ind.promo.atual).length;
+      const antes = pb ? ` (${fmt.pct0.format(pb.pctGmv)} no mesmo período do mês anterior)` : '';
+      itens.push({
+        tom: 'neutro',
+        texto: `Nas ${lojasPromo} lojas VTEX com dado de promoção, ${fmt.pct0.format(pa.pctGmv)} do GMV veio de pedidos com promoção${antes}, com ${reais(pa.desconto)} de desconto (${fmt.pct1.format(pa.investimento)} do GMV dessas lojas).`,
+      });
+    }
+
     const churn = porLoja.filter(x => x.ind.farolCs === 'Churn' && (x.ind.gmv.real ?? 0) > 0);
     if (churn.length) {
       const gmv = churn.reduce((a, x) => a + x.ind.gmv.real, 0);
@@ -614,6 +655,14 @@
     npsQueda: -10, // pontos vs os 90 dias anteriores
     maximoGeral: 10, // sugestões na visão de todas as lojas
     maximoPorArea: 3, // na visão geral, para a lista não virar só uma área
+    usoBaixoPromo: 0.10, // parcela dos pedidos com promoção abaixo da qual sugerir testar
+    altaPromo: 0.20, // alta dos pedidos com promoção para sugerir escalar
+    altaInvestimento: 0.02, // alta do desconto como % do GMV (p.p.) para sugerir revisar
+    dependenciaPromo: 0.80, // parcela do GMV com promoção
+    descontoAlto: 0.30, // desconto médio sobre o preço cheio
+    pedidosMinimos: 30, // abaixo disso, variação de volume, ticket e promoção é ruído
+    descontoMinimo: 5000, // R$ de desconto no período para sugerir rever profundidade
+    skusComVendaMinimos: 10, // estoque "100% parado" com menos que isso é falta de média de venda na origem
   };
 
   // Parcela média de cada canal nas lojas de um mesmo modelo de negócio (loja sem o canal conta 0)
@@ -711,17 +760,68 @@
       }
     }
 
+    // Promoções na VTEX (fonte própria, sempre vs o mesmo período do mês anterior)
+    let volumePorPromocao = false;
+    let escalar = false;
+    const pa = ind.promo.atual;
+    const pb = ind.promo.anterior;
+    if (pa && pb && (pa.pedidosCom || pb.pedidosCom)) {
+      const mesAnterior = COMPARACOES.anterior.curto;
+      const varPedidos = pa.pedidos / pb.pedidos - 1;
+      const varPedidosCom = pb.pedidosCom ? pa.pedidosCom / pb.pedidosCom - 1 : null;
+      const varGmv = pb.gmv ? pa.gmv / pb.gmv - 1 : null;
+      const varDesconto = pb.desconto ? pa.desconto / pb.desconto - 1 : null;
+      const tops = (base.promocoes_top ?? []).filter(p => p.loja === loja);
+      const maisVendida = tops.slice().sort((a, b) => (b.gmv_atual ?? 0) - (a.gmv_atual ?? 0))[0];
+      const maisDesconto = tops.slice().sort((a, b) => (b.desconto_atual ?? 0) - (a.desconto_atual ?? 0))[0];
+      const usoCaiu = pa.pctPedidos < pb.pctPedidos - ACAO.estavel;
+      const baseOk = pa.pedidos >= ACAO.pedidosMinimos && pb.pedidos >= ACAO.pedidosMinimos;
+
+      if (baseOk && varPedidos <= ACAO.quedaVolume && (usoCaiu || pa.pctPedidos < ACAO.usoBaixoPromo)) {
+        volumePorPromocao = true;
+        const uso = usoCaiu
+          ? `os pedidos com promoção ${varPedidosCom != null ? `${fmt.variacao.format(varPedidosCom)} ` : ''}(de ${fmt.pct0.format(pb.pctPedidos)} para ${fmt.pct0.format(pa.pctPedidos)} dos pedidos)`
+          : `só ${fmt.pct0.format(pa.pctPedidos)} dos pedidos tiveram promoção`;
+        add('Promoções', usoCaiu ? 'Ampliar as promoções' : 'Testar promoções para recuperar volume',
+          `Na VTEX, pedidos ${fmt.variacao.format(varPedidos)} vs ${mesAnterior} e ${uso}. Retomar ou ampliar campanhas, cupom de recompra e ações de CRM tende a devolver volume.${maisVendida ? ` Hoje a promoção que mais vende é "${maisVendida.promocao}".` : ''}`,
+          (pb.pedidos - pa.pedidos) * (pa.gmv / pa.pedidos));
+      } else if (baseOk && pa.pedidosCom >= ACAO.pedidosMinimos && varPedidos >= -ACAO.quedaVolume && varPedidosCom != null && varPedidosCom >= ACAO.altaPromo
+        && pa.taxaDesconto != null && pb.taxaDesconto != null && pa.taxaDesconto <= pb.taxaDesconto + ACAO.estavel && varGmv > 0) {
+        escalar = true;
+        add('Promoções', 'Escalar a promoção que está funcionando',
+          `Na VTEX, pedidos com promoção ${fmt.variacao.format(varPedidosCom)} vs ${mesAnterior} com desconto médio ${pa.taxaDesconto < pb.taxaDesconto - ACAO.estavel ? 'menor' : 'estável'} (${fmt.pct1.format(pb.taxaDesconto)} para ${fmt.pct1.format(pa.taxaDesconto)}) e GMV ${fmt.variacao.format(varGmv)}: a promoção está trazendo volume sem aprofundar o desconto.${maisVendida ? ` A que mais vende é "${maisVendida.promocao}" (${reais(maisVendida.gmv_atual)} em ${fmt.inteiro.format(maisVendida.pedidos_atual)} pedidos): vale ampliar alcance e verba.` : ''}`,
+          pa.gmv - pb.gmv);
+      }
+
+      // Desconto pesando mais no GMV só é problema se ficou mais fundo ou se o GMV caiu;
+      // com o mesmo desconto médio e mais volume, é a promoção funcionando (regra acima)
+      const maisFundo = pa.taxaDesconto != null && pb.taxaDesconto != null && pa.taxaDesconto > pb.taxaDesconto + ACAO.estavel;
+      if (!escalar && baseOk && pa.desconto >= ACAO.descontoMinimo && pa.investimento != null && pb.investimento != null && pa.investimento - pb.investimento >= ACAO.altaInvestimento
+        && varDesconto != null && varGmv != null && varGmv < varDesconto - ACAO.estavel * 3 && (maisFundo || varGmv < 0)) {
+        add('Promoções', 'Rever a profundidade do desconto',
+          `Na VTEX, o desconto concedido foi ${fmt.variacao.format(varDesconto)} vs ${mesAnterior} (${reais(pa.desconto)}) e o GMV ${fmt.variacao.format(varGmv)}: o investimento subiu de ${fmt.pct1.format(pb.investimento)} para ${fmt.pct1.format(pa.investimento)} do GMV sem retorno proporcional.${maisDesconto ? ` A promoção com mais desconto é "${maisDesconto.promocao}" (${reais(maisDesconto.desconto_atual)}).` : ''} Rever profundidade, público ou duração.`,
+          Math.max(pa.desconto - pb.desconto * (1 + varGmv), 0) || null);
+      }
+
+      if (pa.pedidos >= ACAO.pedidosMinimos && pa.pctGmv >= ACAO.dependenciaPromo && pa.taxaDesconto >= ACAO.descontoAlto) {
+        add('Promoções', 'Reduzir a dependência de promoção',
+          `${fmt.pct0.format(pa.pctGmv)} do GMV na VTEX vem de pedidos com promoção, com desconto médio de ${fmt.pct0.format(pa.taxaDesconto)} sobre o preço cheio. A margem fica pressionada: avaliar reduzir a profundidade, principalmente se parte disso for tabela de preço feita via promoção.`);
+      }
+    }
+
     // Volume x ticket: onde promoção, cupom e CRM ajudam
     const dec = decomposicao(ind);
     if (dec) {
       const { atual, anterior } = ind.venda;
-      const desconto = atual.descontoPct != null && anterior.descontoPct != null
+      const desconto = atual.descontoPct != null && anterior.descontoPct != null && Math.max(atual.descontoPct, anterior.descontoPct) >= 0.005
         ? ` O desconto médio foi de ${fmt.pct1.format(anterior.descontoPct)} para ${fmt.pct1.format(atual.descontoPct)}.` : '';
-      if (dec.pedidos <= ACAO.quedaVolume && dec.ticket > -ACAO.estavel) {
+      const baseVenda = atual.pedidos >= ACAO.pedidosMinimos && anterior.pedidos >= ACAO.pedidosMinimos;
+      // Se a regra de promoção da VTEX já tratou o volume, não repete a sugestão
+      if (baseVenda && dec.pedidos <= ACAO.quedaVolume && dec.ticket > -ACAO.estavel && !volumePorPromocao) {
         add('Promoções', 'Recuperar volume de pedidos',
           `Pedidos ${fmt.variacao.format(dec.pedidos)} vs ${comparacao} com ticket médio ${fmt.variacao.format(dec.ticket)}: a queda é de volume, não de preço.${desconto} Promoção, cupom ou campanha de CRM atacam direto o volume.`,
           (anterior.pedidos - atual.pedidos) * atual.ticket);
-      } else if (dec.ticket <= ACAO.quedaTicket && dec.pedidos > -ACAO.estavel) {
+      } else if (baseVenda && dec.ticket <= ACAO.quedaTicket && dec.pedidos > -ACAO.estavel) {
         const causa = dec.itensPorPedido < dec.precoItem ? 'menos itens por pedido' : 'preço médio por item menor';
         add('Promoções', 'Proteger o ticket médio',
           `Ticket médio ${fmt.variacao.format(dec.ticket)} vs ${comparacao} com volume estável, puxado por ${causa}.${desconto} Revisar a intensidade de desconto e testar kits, combos ou frete grátis a partir de um valor mínimo.`,
@@ -741,7 +841,7 @@
         e.vendaRiscoDia && diasMes > 0 ? e.vendaRiscoDia * diasMes : null);
     }
     const parados = e.disponiveis != null && e.paradoPct != null ? e.disponiveis * e.paradoPct : 0;
-    if (ativo && e.paradoPct >= ACAO.paradoMinimo && parados >= ACAO.itensParadosMinimo) {
+    if (ativo && (e.skusComVenda ?? 0) >= ACAO.skusComVendaMinimos && e.paradoPct >= ACAO.paradoMinimo && parados >= ACAO.itensParadosMinimo) {
       add('Promoções', 'Girar o estoque parado',
         `${fmt.pct0.format(e.paradoPct)} do estoque disponível (${fmt.compacto.format(parados)} itens) está em SKUs sem venda nos últimos 90 dias. São candidatos a promoção, kit com itens de giro ou liquidação, liberando capital e espaço.`);
     }

@@ -29,6 +29,8 @@ index.html → assets/nucleo.js (regras e insights, sem DOM) → assets/app.js (
 | `nps.sql` | `lojas` | Respostas, promotores e detratores em janela de 90 dias |
 | `farol_cs.sql` | `lojas` | Farol manual do CS (Feliz, Atenção, Churn) |
 | `growth.sql` | `lojas` | Sessões e transações do GA4, até D-2 |
+| `promocoes.sql` | `lojas` | Pedidos e GMV com e sem promoção, desconto (só VTEX flagship Brasil) |
+| `promocoes_top.sql` | `promocoes_top` | As 5 promoções com mais GMV por loja |
 | `vendas_canal.sql` | `canais` | GMV por canal de venda |
 | `vendas_diario.sql` | `diario` | GMV e meta por dia do mês (faixa da projeção) |
 | `frescor.sql` | `frescor` | Última carga e data do dado mais recente de cada fonte |
@@ -46,6 +48,8 @@ Cada SQL documenta no cabeçalho as regras que espelha e as pegadinhas da origem
 - **Cobertura:** estoque dos SKUs com venda ÷ venda média diária. Os SKUs parados ficam de fora, senão a cobertura dá milhares de dias.
 - **Saúde da loja:** média de vendas vs meta, OTD, ruptura, avaria e NPS (bom 1, atenção 0,5, ruim 0). Limites em `SAUDE` no `nucleo.js`; os de ruptura, avaria e NPS são pontos de partida.
 - **Conversão:** transações ÷ sessões sobre as somas. Os dashboards de GA fazem média das taxas por linha, que distorce.
+- **Promoções:** fonte própria (VTEX flagship Brasil, valor captado pela data da NF), com cobertura parcial (~27 lojas). Não soma com o GMV do site: as razões são calculadas só dentro dela e cada loja é comparada com ela mesma no mês anterior.
+- **Plano de ação:** regras em `recomendacoesLoja` no `nucleo.js`, com limites em `ACAO`. Apontam onde olhar a partir dos números; a causa precisa ser confirmada.
 - **Alertas de dados:** quedas para perto de zero, OTD implausível, fonte sem dado novo, loja de estoque sem integrar e GMV sem canal. Limites em `ANOMALIA` no `nucleo.js`.
 - **Estoque:** foto atual, sem comparativo (a origem não tem histórico).
 - **Vendas:** o dashboard lê o Databricks; aqui são as views equivalentes no BigQuery.
@@ -71,8 +75,8 @@ Mudou CSS ou JS? Suba o `?v=` no `index.html`: o Pages guarda esses arquivos em 
 2. **Secrets:** `GCP_WORKLOAD_IDENTITY_PROVIDER`, `GCP_SERVICE_ACCOUNT` e, para o resumo semanal, `TEAMS_WEBHOOK_URL` (webhook do app Workflows no canal).
 3. **Variables:** `BQ_PROJECT` (`infra-datalake-prd-4a9a`), `BQ_LOCATION` (padrão `US`) e `SITE_URL` (botão do card no Teams).
 4. **Permissões da service account:** `roles/bigquery.jobUser` no projeto e `roles/bigquery.dataViewer` em:
-   `visualization_order_cycle_context`, `visualization_daily_records_context`, `visualization_master_data_context`, `visualization_marketing_context`, `gold_master_data_context`, `gold_order_cycle_context` (partições, para a atualização das fontes), `gold_engagement_context` (GA) e `bronze_google_sheet` (cadastro de growth). As `vw_*` levantadas são tabelas materializadas no prd, o que dispensa acesso às tabelas de origem; se alguma for view de verdade, o primeiro run acusa a permissão que falta.
+   `visualization_order_cycle_context`, `visualization_daily_records_context`, `visualization_master_data_context`, `visualization_marketing_context`, `gold_master_data_context`, `gold_order_cycle_context` (partições, para a atualização das fontes), `gold_engagement_context` (GA) e `bronze_google_sheet` (cadastro de growth). As promoções usam `visualization_order_cycle_context`, já listado. As `vw_*` levantadas são tabelas materializadas no prd, o que dispensa acesso às tabelas de origem; se alguma for view de verdade, o primeiro run acusa a permissão que falta.
 
-Custo: cerca de 37 GB processados por execução, quase tudo nas três consultas de vendas.
+Custo: cerca de 44 GB processados por execução, quase tudo nas três consultas de vendas e nas duas de promoções.
 
 > **Visibilidade:** um site do GitHub Pages em conta pessoal é público na internet, mesmo com repositório privado. Antes de publicar dados reais, confirme que esse nível de exposição é aceitável.

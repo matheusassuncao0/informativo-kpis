@@ -58,10 +58,26 @@ const CS = { 'Loja exemplo A': 'Feliz', 'Loja exemplo B': 'Atenção', 'Loja exe
 // Desconto médio [atual, anterior] onde a origem informa (na base real, poucas lojas)
 const DESCONTO = { 'Loja exemplo A': [0.08, 0.06], 'Loja exemplo E': [0.05, 0.09] };
 const INTEGRACAO = { 'Loja exemplo G': '2026-10-02' };
+// Promoções na VTEX: [parcela dos pedidos com promoção, desconto médio] atual e anterior, e o
+// tamanho da base VTEX no período anterior em relação ao atual (volume)
+const PROMO = {
+  'Loja exemplo A': { atual: [0.30, 0.15], anterior: [0.25, 0.14], volumeAnterior: 0.95 },
+  'Loja exemplo B': { atual: [0.10, 0.12], anterior: [0.22, 0.12], volumeAnterior: 1.25 },
+  'Loja exemplo E': { atual: [0.40, 0.33], anterior: [0.38, 0.25], volumeAnterior: 1.15 },
+  'Loja exemplo F': { atual: [0.38, 0.18], anterior: [0.26, 0.18], volumeAnterior: 0.85 },
+};
+// [nome, tipo, parcela do GMV com promoção, desconto médio, variação vs mês anterior]
+const TOP_PROMOCOES = {
+  'Loja exemplo A': [['10% no Pix', 'Promoção', 0.45, 0.10, 0.12], ['Cupom BEMVINDO10', 'Cupom de Desconto', 0.30, 0.10, 0.25], ['Leve 3, pague 2', 'Promoção', 0.25, 0.33, null]],
+  'Loja exemplo B': [['Frete com desconto acima de R$ 199', 'Promoção', 0.60, 0.08, -0.45], ['Cupom VOLTA15', 'Cupom de Desconto', 0.40, 0.15, -0.30]],
+  'Loja exemplo E': [['Semana do cliente 30% OFF', 'Promoção', 0.65, 0.30, 0.40], ['Cupom APP20', 'Cupom de Desconto', 0.35, 0.20, 0.10]],
+  'Loja exemplo F': [['Kit presente 15% OFF', 'Promoção', 0.70, 0.15, 0.80], ['10% no Pix', 'Promoção', 0.30, 0.10, 0.20]],
+};
 
 const lojas = [];
 const diario = [];
 const canais = [];
+const promocoesTop = [];
 
 for (const p of LOJAS) {
   const l = { loja: p.loja, modelo: p.modelo };
@@ -105,6 +121,39 @@ for (const p of LOJAS) {
         desconto_atual: arred(gmvAtual * atual / (1 - atual)),
         desconto_anterior: arred(gmvAnterior * anterior / (1 - anterior)),
         desconto_alinhado: arred(gmvAlinhado * anterior / (1 - anterior)),
+      });
+    }
+    if (PROMO[p.loja]) {
+      // Base VTEX: 90% do GMV e dos pedidos da loja (a fonte de promoção cobre só a VTEX)
+      const cfg = PROMO[p.loja];
+      const periodos = [
+        ['atual', cfg.atual, gmvAtual * 0.9, l.pedidos_atual * 0.9],
+        ['anterior', cfg.anterior, gmvAtual * 0.9 * cfg.volumeAnterior, l.pedidos_atual * 0.9 * cfg.volumeAnterior],
+      ];
+      for (const [sufixo, [parcela, taxa], gmv, totalPedidos] of periodos) {
+        const pedidosCom = Math.round(totalPedidos * parcela);
+        const gmvCom = gmv * parcela * 1.1;
+        const gmvItens = gmvCom * 0.7;
+        Object.assign(l, {
+          [`promo_gmv_com_${sufixo}`]: arred(gmvCom),
+          [`promo_gmv_sem_${sufixo}`]: arred(gmv - gmvCom),
+          [`promo_gmv_itens_${sufixo}`]: arred(gmvItens),
+          [`promo_pedidos_com_${sufixo}`]: pedidosCom,
+          [`promo_pedidos_sem_${sufixo}`]: Math.round(totalPedidos) - pedidosCom,
+          [`promo_pedidos_cupom_${sufixo}`]: Math.round(pedidosCom * 0.3),
+          [`promo_desconto_${sufixo}`]: arred(gmvItens * taxa / (1 - taxa)),
+          [`promo_desconto_brinde_${sufixo}`]: 0,
+        });
+      }
+      (TOP_PROMOCOES[p.loja] ?? []).forEach(([promocao, tipo, parcela, taxa, variacao], i) => {
+        const gmv = l.promo_gmv_itens_atual * parcela;
+        promocoesTop.push({
+          loja: p.loja, posicao: i + 1, promocao, tipo, brinde: false,
+          pedidos_atual: Math.round(l.promo_pedidos_com_atual * parcela), gmv_atual: arred(gmv), desconto_atual: arred(gmv * taxa / (1 - taxa)),
+          pedidos_anterior: variacao == null ? 0 : Math.round(l.promo_pedidos_com_atual * parcela / (1 + variacao)),
+          gmv_anterior: variacao == null ? 0 : arred(gmv / (1 + variacao)),
+          desconto_anterior: variacao == null ? 0 : arred(gmv / (1 + variacao) * taxa / (1 - taxa)),
+        });
       });
     }
     if (p.ser) {
@@ -169,6 +218,7 @@ const saida = {
   lojas,
   canais,
   diario,
+  promocoes_top: promocoesTop,
   frescor: [
     { fonte: 'Vendas', ultima_carga: '2026-10-07T09:40:00.000Z', dado_ate: '2026-10-07' },
     { fonte: 'Estoque', ultima_carga: '2026-10-07T06:15:00.000Z', dado_ate: '2026-10-07' },
