@@ -1,120 +1,20 @@
+// Interface do site. As regras e os textos dos insights ficam em nucleo.js.
 (function () {
   'use strict';
 
+  const N = globalThis.Nucleo;
+  const { fmt, reais, num, nomeMeta } = N;
+
   const TODAS = '__todas__';
-  const CHAVE_LOJA = 'informativo-kpis:loja';
-  const CHAVE_META = 'informativo-kpis:meta';
-  const METAS = { forecast: 'Forecast', budget: 'Budget' };
-  const META_OTD = 0.95;
-  const BASE_MINIMA_OTD = 100; // entregas: abaixo disso o % de OTD oscila demais para virar destaque
   const LINHAS_TABELA = 10;
-
-  const nf = opcoes => new Intl.NumberFormat('pt-BR', opcoes);
-  const fmt = {
-    inteiro: nf({ maximumFractionDigits: 0 }),
-    inteiroSinal: nf({ maximumFractionDigits: 0, signDisplay: 'exceptZero' }),
-    compacto: nf({ notation: 'compact', maximumFractionDigits: 1 }),
-    pct: nf({ style: 'percent', minimumFractionDigits: 2, maximumFractionDigits: 2 }),
-    pct0: nf({ style: 'percent', maximumFractionDigits: 0 }),
-    pctSinal: nf({ style: 'percent', minimumFractionDigits: 2, maximumFractionDigits: 2, signDisplay: 'exceptZero' }),
-    variacao: nf({ style: 'percent', minimumFractionDigits: 1, maximumFractionDigits: 1, signDisplay: 'exceptZero' }),
-    pp: nf({ minimumFractionDigits: 2, maximumFractionDigits: 2, signDisplay: 'exceptZero' }),
-  };
-  // Espaço não separável: "−R$" nunca quebra longe do número
-  const reais = (v, comSinal = false) =>
-    `${comSinal && v > 0 ? '+' : ''}${v < 0 ? '−' : ''}R$ ${fmt.compacto.format(Math.abs(v))}`;
-
-  const num = v => (typeof v === 'number' && Number.isFinite(v) ? v : null);
-  const razao = (a, b) => (a == null || !b ? null : a / b);
-  const nomeMeta = ctx => METAS[ctx.meta];
-
-  // ---------------------------------------------------------------------------
-  // Indicadores derivados. Sempre calculados sobre campos já somados, para o
-  // "Todas as lojas" não virar média de percentual.
-
-  function serieVendas(d, prefixo, meta) {
-    const real = num(d[`${prefixo}_atual`]);
-    const anterior = num(d[`${prefixo}_anterior`]);
-    const metaAteOntem = num(d[`${prefixo}_${meta}`]);
-    const metaMes = num(d[`${prefixo}_${meta}_mes`]);
-    // Sem venda e com meta, o dashboard trata o realizado como 0 (vira -100%)
-    const atingimento = metaAteOntem ? (real ?? 0) / metaAteOntem : null;
-    return {
-      real,
-      anterior,
-      metaAteOntem,
-      metaMes,
-      atingimento,
-      diferenca: atingimento == null ? null : (real ?? 0) - metaAteOntem,
-      // Projeção: mantém o atingimento atual sobre a meta do mês. A meta diária
-      // já traz o peso de fim de semana e feriado, então não é uma média linear.
-      projecao: atingimento == null || !metaMes ? null : atingimento * metaMes,
-      variacao: real == null || !anterior ? null : real / anterior - 1,
-    };
-  }
-
-  function indicadores(d, ctx) {
-    return {
-      gmv: serieVendas(d, 'gmv', ctx.meta),
-      ser: serieVendas(d, 'ser', ctx.meta),
-      estoque: { disponiveis: num(d.itens_disponiveis), avaria: num(d.itens_avaria) },
-      otd: {
-        entregues: num(d.otd_entregues_atual),
-        entreguesAnterior: num(d.otd_entregues_anterior),
-        atual: razao(num(d.otd_no_prazo_atual), num(d.otd_entregues_atual)),
-        anterior: razao(num(d.otd_no_prazo_anterior), num(d.otd_entregues_anterior)),
-      },
-    };
-  }
-
-  // Farol do dashboard: > 103% verde, > 97% âmbar, abaixo disso (ou realizado zerado) vermelho
-  function farol(atingimento) {
-    if (atingimento == null) return { classe: 'neutro', longo: 'Sem meta', curto: 'Sem meta' };
-    if (atingimento > 1.03) return { classe: 'bom', longo: 'Acima da meta (> 103%)', curto: 'Acima' };
-    if (atingimento > 0.97) return { classe: 'alerta', longo: 'Na faixa da meta (97% a 103%)', curto: 'Na faixa' };
-    return { classe: 'ruim', longo: 'Abaixo da meta (< 97%)', curto: 'Abaixo' };
-  }
-
-  // ---------------------------------------------------------------------------
-  // Seções de cards. tipo 'valor' (padrão): número com variação opcional vs mês
-  // anterior; 'meta': delta contra a meta até ontem; 'projecao': fechamento do mês.
-
-  const SECAO_VENDAS = {
-    sobretitulo: 'Desempenho de vendas · One page',
-    titulo: 'Vendas',
-    nota: ctx => `Faturado por data de NF, tipo de venda "Venda" (mesmas regras da One page do Desempenho de vendas). Meta: ${nomeMeta(ctx)}. A projeção mantém o atingimento atual até o fim do mês.`,
-    tiles: [
-      { rotulo: 'GMV realizado (R$)', atual: i => i.gmv.real, anterior: i => i.gmv.anterior, formato: 'inteiro', melhor: 'alta' },
-      { tipo: 'meta', rotulo: ctx => `Delta GMV vs ${nomeMeta(ctx).toLowerCase()} (%)`, serie: i => i.gmv },
-      { tipo: 'projecao', rotulo: 'Projeção de GMV no mês (R$)', serie: i => i.gmv },
-      { rotulo: 'SER estimado (R$)', atual: i => i.ser.real, anterior: i => i.ser.anterior, formato: 'inteiro', melhor: 'alta' },
-      { tipo: 'meta', rotulo: ctx => `Delta SER vs ${nomeMeta(ctx).toLowerCase()} (%)`, serie: i => i.ser },
-      { tipo: 'projecao', rotulo: 'Projeção de SER no mês (R$)', serie: i => i.ser },
-    ],
-  };
-
-  const SECAO_ESTOQUE = {
-    sobretitulo: 'Estoque B2C',
-    titulo: 'Estoque',
-    nota: 'Posição no momento da atualização, sem comparativo. Avaria da Pernod Ricard não é exibida (mesma regra do dashboard Estoque B2C).',
-    tiles: [
-      { rotulo: 'Itens disponíveis (un.)', atual: i => i.estoque.disponiveis, formato: 'inteiro' },
-      { rotulo: 'Itens em avaria (un.)', atual: i => i.estoque.avaria, formato: 'inteiro' },
-    ],
-  };
-
-  const SECAO_OTD = {
-    sobretitulo: 'OTD B2C',
-    titulo: 'Entregas',
-    nota: 'Pedidos B2C pela data de entrega (mesma regra do dashboard OTD B2C).',
-    tiles: [
-      { rotulo: 'Pedidos entregues (qtd.)', atual: i => i.otd.entregues, anterior: i => i.otd.entreguesAnterior, formato: 'inteiro', melhor: 'alta' },
-      { rotulo: 'OTD (%)', atual: i => i.otd.atual, anterior: i => i.otd.anterior, formato: 'pct', melhor: 'alta', alvo: META_OTD },
-    ],
+  const PREFERENCIAS = {
+    loja: { chave: 'informativo-kpis:loja', padrao: TODAS },
+    meta: { chave: 'informativo-kpis:meta', padrao: 'forecast' },
+    comp: { chave: 'informativo-kpis:comp', padrao: 'anterior' },
   };
 
   // ---------------------------------------------------------------------------
-  // Utilitários de DOM e texto
+  // Utilitários de DOM
 
   const el = id => document.getElementById(id);
   const resolver = (v, ctx) => (typeof v === 'function' ? v(ctx) : v);
@@ -136,36 +36,19 @@
     return criar('span', `status status--${classe}`, texto);
   }
 
-  function juntar(itens) {
-    return itens.length < 2 ? itens.join('') : `${itens.slice(0, -1).join(', ')} e ${itens[itens.length - 1]}`;
-  }
-
-  function dataCurta(iso) {
-    const [ano, mes, dia] = iso.split('-');
-    return `${dia}/${mes}/${ano}`;
-  }
-
-  function intervalo(p) {
-    return `${dataCurta(p.inicio)} a ${dataCurta(p.fim)}`;
-  }
-
-  function formatar(valor, formato) {
-    return formato === 'pct' ? fmt.pct.format(valor) : fmt.inteiro.format(valor);
-  }
-
-  function somar(linhas) {
-    const total = {};
-    for (const l of linhas) {
-      for (const [campo, valor] of Object.entries(l)) {
-        if (typeof valor !== 'number') continue;
-        total[campo] = (total[campo] ?? 0) + valor;
-      }
-    }
-    return total;
+  function periodoComparacao(ctx) {
+    return estado.base.periodo[ctx.comparacao] ?? estado.base.periodo.anterior;
   }
 
   // ---------------------------------------------------------------------------
   // Cards
+
+  function formatar(valor, formato) {
+    if (formato === 'pct') return fmt.pct.format(valor);
+    if (formato === 'decimal') return fmt.decimal.format(valor);
+    if (formato === 'nps') return fmt.inteiro.format(valor);
+    return fmt.inteiro.format(valor);
+  }
 
   function vazio(card, conteudo) {
     card.append(criar('p', 'tile__valor tile__valor--vazio', '—'));
@@ -173,19 +56,20 @@
     return card;
   }
 
-  function linhaVariacao(tile, atual, anterior, periodoAnterior) {
-    if (anterior == null || (tile.formato !== 'pct' && anterior === 0)) {
-      return linha('Sem base no mesmo período do mês anterior');
+  function linhaVariacao(tile, atual, anterior, ctx) {
+    if (anterior == null || (tile.formato !== 'pct' && tile.formato !== 'nps' && anterior === 0)) {
+      return linha(`Sem base ${tile.rotuloComparacao ? `nos ${resolver(tile.rotuloComparacao, ctx)}` : `no ${N.COMPARACOES[ctx.comparacao].curto}`}`);
     }
     const diferenca = atual - anterior;
-    const texto = tile.formato === 'pct'
-      ? `${fmt.pp.format(diferenca * 100)} p.p.`
-      : fmt.variacao.format(atual / anterior - 1);
+    const texto = tile.formato === 'pct' ? `${fmt.pp.format(diferenca * 100)} p.p.`
+      : tile.formato === 'nps' ? `${fmt.inteiroSinal.format(diferenca)} ${Math.round(Math.abs(diferenca)) === 1 ? 'ponto' : 'pontos'}`
+        : fmt.variacao.format(atual / anterior - 1);
     const subiu = diferenca > 0;
     const classe = diferenca === 0 ? 'delta--neutro'
       : (subiu === (tile.melhor === 'alta') ? 'delta--bom' : 'delta--ruim');
     const seta = diferenca === 0 ? '■' : (subiu ? '▲' : '▼');
-    return linha(criar('span', `delta ${classe}`, `${seta} ${texto}`), ` vs ${intervalo(periodoAnterior)}`);
+    const referencia = tile.rotuloComparacao ? resolver(tile.rotuloComparacao, ctx) : N.intervalo(periodoComparacao(ctx));
+    return linha(criar('span', `delta ${classe}`, `${seta} ${texto}`), ` vs ${referencia}`);
   }
 
   function linhaAlvo(tile, atual) {
@@ -198,7 +82,7 @@
 
   function tileMeta(card, s, ctx) {
     if (s.atingimento == null) return vazio(card, status('neutro', 'Sem meta'));
-    const f = farol(s.atingimento);
+    const f = N.farol(s.atingimento);
     card.append(criar('p', 'tile__valor', fmt.pctSinal.format(s.atingimento - 1)));
     card.append(linha(`${nomeMeta(ctx)} até ontem: ${fmt.inteiro.format(s.metaAteOntem)} (R$)`));
     card.append(linha(`Diferença: ${fmt.inteiroSinal.format(s.diferenca)} (R$)`));
@@ -206,13 +90,20 @@
     return card;
   }
 
-  function medidor(s, f) {
+  // Trilho: meta do mês. Preenchimento: realizado. Faixa clara: projeção provável. Marca: esperado até ontem.
+  function medidor(s, f, faixa) {
     const limitar = v => Math.min(Math.max(v, 0), 1);
     const realizado = limitar((s.real ?? 0) / s.metaMes);
     const esperado = limitar(s.metaAteOntem / s.metaMes);
     const caixa = criar('div', `medidor medidor--${f.classe}`);
     caixa.setAttribute('role', 'img');
     caixa.setAttribute('aria-label', `Realizado ${fmt.pct0.format(realizado)} da meta do mês; esperado até ontem ${fmt.pct0.format(esperado)}`);
+    if (faixa) {
+      const banda = criar('div', 'medidor__faixa');
+      banda.style.left = `${limitar(faixa.min / s.metaMes) * 100}%`;
+      banda.style.width = `${(limitar(faixa.max / s.metaMes) - limitar(faixa.min / s.metaMes)) * 100}%`;
+      caixa.append(banda);
+    }
     const barra = criar('div', 'medidor__preenchimento');
     barra.style.width = `${realizado * 100}%`;
     const marca = criar('div', 'medidor__marca');
@@ -221,32 +112,131 @@
     return caixa;
   }
 
-  function tileProjecao(card, s, ctx) {
+  function tileProjecao(card, s, ctx, faixa) {
     if (s.projecao == null) {
       return vazio(card, s.metaMes ? 'Sem meta até ontem para projetar' : status('neutro', 'Sem meta'));
     }
     const meta = nomeMeta(ctx).toLowerCase();
-    const f = farol(s.atingimento);
+    const f = N.farol(s.atingimento);
     card.append(criar('p', 'tile__valor', fmt.inteiro.format(s.projecao)));
-    card.append(medidor(s, f));
+    card.append(medidor(s, f, faixa));
     card.append(linha(`${fmt.pct0.format((s.real ?? 0) / s.metaMes)} do mês feito · ${fmt.pct0.format(s.metaAteOntem / s.metaMes)} esperado até ontem`));
+    if (faixa) {
+      card.append(linha(`Faixa provável (80%): ${reais(faixa.min)} a ${reais(faixa.max)}`));
+    }
     card.append(linha(status(f.classe, `Fecha em ${fmt.pct0.format(s.atingimento)} do ${meta} do mês (${fmt.compacto.format(s.metaMes)})`)));
     return card;
   }
 
-  function renderizarTile(tile, ind, ctx) {
+  function renderizarTile(tile, ind, ctx, extra) {
     const card = criar('article', 'tile');
     card.append(criar('h3', 'tile__rotulo', resolver(tile.rotulo, ctx)));
     if (tile.tipo === 'meta') return tileMeta(card, tile.serie(ind), ctx);
-    if (tile.tipo === 'projecao') return tileProjecao(card, tile.serie(ind), ctx);
+    if (tile.tipo === 'projecao') return tileProjecao(card, tile.serie(ind), ctx, tile.faixa ? extra.faixa : null);
 
     const atual = num(tile.atual(ind));
     if (atual == null) return vazio(card, 'Sem dado para esta seleção');
     card.append(criar('p', 'tile__valor', formatar(atual, tile.formato)));
-    if (tile.anterior) card.append(linhaVariacao(tile, atual, num(tile.anterior(ind)), estado.base.periodo.anterior));
+    if (tile.anterior) card.append(linhaVariacao(tile, atual, num(tile.anterior(ind)), ctx));
     if (tile.alvo != null) card.append(linhaAlvo(tile, atual));
+    if (tile.nota) {
+      const nota = tile.nota(ind);
+      if (nota) card.append(linha(nota));
+    }
     return card;
   }
+
+  // ---------------------------------------------------------------------------
+  // Definição das seções de cards
+
+  const SECAO_VENDAS = {
+    sobretitulo: 'Desempenho de vendas · One page',
+    titulo: 'Vendas',
+    nota: ctx => `Faturado por data de NF, tipo de venda "Venda" (mesmas regras da One page do Desempenho de vendas). Meta: ${nomeMeta(ctx)}. A projeção mantém o atingimento atual até o fim do mês.`,
+    tiles: [
+      { rotulo: 'GMV realizado (R$)', atual: i => i.gmv.real, anterior: i => i.gmv.anterior, formato: 'inteiro', melhor: 'alta' },
+      { tipo: 'meta', rotulo: ctx => `Delta GMV vs ${nomeMeta(ctx).toLowerCase()} (%)`, serie: i => i.gmv },
+      { tipo: 'projecao', rotulo: 'Projeção de GMV no mês (R$)', serie: i => i.gmv, faixa: true },
+      { rotulo: 'SER estimado (R$)', atual: i => i.ser.real, anterior: i => i.ser.anterior, formato: 'inteiro', melhor: 'alta' },
+      { tipo: 'meta', rotulo: ctx => `Delta SER vs ${nomeMeta(ctx).toLowerCase()} (%)`, serie: i => i.ser },
+      { tipo: 'projecao', rotulo: 'Projeção de SER no mês (R$)', serie: i => i.ser },
+    ],
+  };
+
+  const SECAO_DECOMPOSICAO = {
+    sobretitulo: 'Por que o GMV variou',
+    titulo: 'Volume e ticket',
+    nota: 'GMV = pedidos × ticket médio, e ticket médio = itens por pedido × preço médio por item. Pedidos e itens faturados, com os mesmos filtros do GMV.',
+    tiles: [
+      { rotulo: 'Pedidos faturados (qtd.)', atual: i => i.venda.atual.pedidos || null, anterior: i => i.venda.anterior.pedidos, formato: 'inteiro', melhor: 'alta' },
+      { rotulo: 'Ticket médio (R$)', atual: i => i.venda.atual.ticket, anterior: i => i.venda.anterior.ticket, formato: 'inteiro', melhor: 'alta' },
+      { rotulo: 'Itens por pedido (qtd.)', atual: i => i.venda.atual.itensPorPedido, anterior: i => i.venda.anterior.itensPorPedido, formato: 'decimal', melhor: 'alta' },
+    ],
+  };
+
+  const comparacaoGrowth = ctx => `${N.COMPARACOES[ctx.comparacao].curto} (até D-2)`;
+
+  const SECAO_GROWTH = {
+    sobretitulo: 'Growth',
+    titulo: 'Tráfego e conversão',
+    nota: 'Sessões e transações do Google Analytics (GA4), até D-2: o GA ainda não fechou o dia anterior na hora da carga. Conversão = transações ÷ sessões sobre as somas (os dashboards de GA fazem média das taxas por linha, que distorce). Só lojas com propriedade GA carregada.',
+    tiles: [
+      { rotulo: 'Sessões (qtd.)', atual: i => i.growth.sessoes, anterior: i => i.growth.sessoesAnterior, formato: 'inteiro', melhor: 'alta', rotuloComparacao: comparacaoGrowth },
+      { rotulo: 'Taxa de conversão (%)', atual: i => i.growth.conversao, anterior: i => i.growth.conversaoAnterior, formato: 'pct', melhor: 'alta', rotuloComparacao: comparacaoGrowth },
+      { rotulo: 'Transações (qtd.)', atual: i => i.growth.transacoes, anterior: i => i.growth.transacoesAnterior, formato: 'inteiro', melhor: 'alta', rotuloComparacao: comparacaoGrowth },
+    ],
+  };
+
+  const SECAO_ESTOQUE = {
+    sobretitulo: 'Estoque B2C',
+    titulo: 'Estoque',
+    nota: 'Posição no momento da atualização, sem comparativo. Ruptura = SKU sem estoque que vendia nos últimos 90 dias. Avaria da Pernod Ricard não é exibida (mesma regra do dashboard Estoque B2C).',
+    tiles: [
+      { rotulo: 'Itens disponíveis (un.)', atual: i => i.estoque.disponiveis, formato: 'inteiro',
+        nota: i => {
+          const e = i.estoque;
+          const partes = [];
+          if (e.cobertura != null) partes.push(`Cobertura de ${fmt.inteiro.format(e.cobertura)} dias nos SKUs com venda`);
+          if (e.paradoPct != null) partes.push(`${fmt.pct0.format(e.paradoPct)} em SKUs sem venda em 90 dias`);
+          return partes.join(' · ') || null;
+        } },
+      { rotulo: 'Itens em avaria (un.)', atual: i => i.estoque.avaria, formato: 'inteiro',
+        nota: i => (i.estoque.avariaPct != null ? `${fmt.pct.format(i.estoque.avariaPct)} do estoque total` : null) },
+      { rotulo: 'SKUs em ruptura (qtd.)', atual: i => i.estoque.skusRuptura, formato: 'inteiro',
+        nota: i => {
+          const e = i.estoque;
+          if (e.skusRuptura == null) return null;
+          const pct = e.rupturaPct != null ? `${fmt.pct1.format(e.rupturaPct)} dos SKUs com venda` : '';
+          return `${pct}${e.skusRupturaA ? ` · ${fmt.inteiro.format(e.skusRupturaA)} da curva A` : ''}${e.skusRisco ? ` · ${fmt.inteiro.format(e.skusRisco)} em risco de ruptura` : ''}`;
+        } },
+      { rotulo: 'Venda em risco por ruptura (R$/dia)', atual: i => i.estoque.vendaRiscoDia, formato: 'inteiro',
+        nota: i => (i.estoque.demandaRuptura != null ? `Estimativa: ${fmt.inteiro.format(i.estoque.demandaRuptura)} un./dia × preço médio por item da loja` : null) },
+    ],
+  };
+
+  const SECAO_OTD = {
+    sobretitulo: 'OTD B2C',
+    titulo: 'Entregas',
+    nota: 'Pedidos B2C pela data de entrega (mesma regra do dashboard OTD B2C).',
+    tiles: [
+      { rotulo: 'Pedidos entregues (qtd.)', atual: i => i.otd.entregues, anterior: i => i.otd.entreguesAnterior, formato: 'inteiro', melhor: 'alta' },
+      { rotulo: 'OTD (%)', atual: i => i.otd.atual, anterior: i => i.otd.anterior, formato: 'pct', melhor: 'alta', alvo: N.META_OTD },
+    ],
+  };
+
+  const SECAO_NPS = {
+    sobretitulo: 'Clientes',
+    titulo: 'Satisfação',
+    nota: 'NPS dos últimos 90 dias (data da resposta) contra os 90 dias anteriores: no mês corrente o volume de respostas é baixo demais. NPS = % promotores (9 e 10) − % detratores (0 a 6).',
+    tiles: [
+      { rotulo: 'NPS (pontos)', atual: i => i.nps.atual, anterior: i => i.nps.anterior, formato: 'nps', melhor: 'alta', rotuloComparacao: '90 dias anteriores',
+        nota: i => {
+          if (i.nps.respostas == null) return null;
+          const pequena = i.nps.respostas < N.BASE_MINIMA_NPS ? ' · amostra pequena, interprete com cuidado' : '';
+          return `${fmt.inteiro.format(i.nps.respostas)} respostas em 90 dias${pequena}`;
+        } },
+    ],
+  };
 
   // ---------------------------------------------------------------------------
   // Seções
@@ -259,109 +249,113 @@
     return secao;
   }
 
-  function secaoCards(def, ind, ctx) {
+  function secaoCards(def, ind, ctx, extra = {}) {
     const secao = novaSecao(def, ctx);
     const grade = criar('div', 'secao__grade');
-    for (const tile of def.tiles) grade.append(renderizarTile(tile, ind, ctx));
+    for (const tile of def.tiles) grade.append(renderizarTile(tile, ind, ctx, extra));
     secao.append(grade);
     return secao;
   }
 
-  // Resumo: frases montadas a partir dos números, do jeito que alguém contaria numa reunião
-
-  function fraseVendas(nome, s, ctx) {
-    const meta = nomeMeta(ctx).toLowerCase();
-    if (s.real == null && s.atingimento == null) return { tom: 'neutro', texto: `Sem ${nome} faturado no período.` };
-    const realizado = `${nome} de ${reais(s.real ?? 0)} até ontem`;
-    if (s.atingimento == null) return { tom: 'neutro', texto: `${realizado}; sem ${meta} cadastrado para comparar.` };
-    let texto = `${realizado}, ${fmt.pctSinal.format(s.atingimento - 1)} vs ${meta}.`;
-    if (s.projecao != null) {
-      texto += ` No ritmo atual, fecha o mês em ${reais(s.projecao)} (${fmt.pct0.format(s.atingimento)} do ${meta} do mês).`;
-    }
-    return { tom: farol(s.atingimento).classe, texto };
-  }
-
-  function destaquesGerais(total, porLoja, ctx) {
-    const meta = nomeMeta(ctx).toLowerCase();
-    const itens = [fraseVendas('GMV', total.gmv, ctx)];
-
-    const comMeta = porLoja.filter(x => x.ind.gmv.atingimento != null);
-    if (comMeta.length) {
-      const abaixo = comMeta
-        .filter(x => farol(x.ind.gmv.atingimento).classe === 'ruim')
-        .sort((a, b) => a.ind.gmv.diferenca - b.ind.gmv.diferenca);
-      if (abaixo.length) {
-        const soma = abaixo.reduce((acc, x) => acc + x.ind.gmv.diferenca, 0);
-        const verbo = abaixo.length === 1 ? 'está' : 'estão';
-        itens.push({
-          tom: 'ruim',
-          texto: `${abaixo.length} de ${comMeta.length} lojas com meta ${verbo} abaixo de 97% do ${meta} até ontem, somando ${reais(soma, true)}. Maiores desvios: ${juntar(abaixo.slice(0, 3).map(x => x.loja))}.`,
-        });
-      } else {
-        itens.push({ tom: 'bom', texto: `Todas as ${comMeta.length} lojas com meta estão acima de 97% do ${meta} até ontem.` });
-      }
-    }
-
-    // Variação em R$ e não em %: loja pequena com base minúscula não domina o destaque
-    const comBase = porLoja
-      .filter(x => x.ind.gmv.real != null && x.ind.gmv.anterior)
-      .map(x => ({ ...x, delta: x.ind.gmv.real - x.ind.gmv.anterior }))
-      .sort((a, b) => b.delta - a.delta);
-    const frases = [];
-    const alta = comBase[0];
-    const queda = comBase[comBase.length - 1];
-    if (alta && alta.delta > 0) frases.push(`Maior alta de GMV vs mês anterior: ${alta.loja} (${reais(alta.delta, true)}, ${fmt.variacao.format(alta.ind.gmv.variacao)}).`);
-    if (queda && queda.delta < 0) frases.push(`Maior queda: ${queda.loja} (${reais(queda.delta, true)}, ${fmt.variacao.format(queda.ind.gmv.variacao)}).`);
-    if (frases.length) itens.push({ tom: 'neutro', texto: frases.join(' ') });
-
-    if (total.otd.atual != null) {
-      const baixas = porLoja
-        .filter(x => (x.ind.otd.entregues ?? 0) >= BASE_MINIMA_OTD && x.ind.otd.atual < META_OTD)
-        .sort((a, b) => a.ind.otd.atual - b.ind.otd.atual);
-      let texto = `OTD geral de ${fmt.pct.format(total.otd.atual)} (meta ${fmt.pct0.format(META_OTD)}).`;
-      if (baixas.length) {
-        const [sujeito, verbo] = baixas.length === 1 ? ['loja', 'está'] : ['lojas', 'estão'];
-        texto += ` ${baixas.length} ${sujeito} com ao menos ${BASE_MINIMA_OTD} entregas ${verbo} abaixo da meta: ${juntar(baixas.slice(0, 3).map(x => `${x.loja} (${fmt.pct.format(x.ind.otd.atual)})`))}.`;
-      } else {
-        texto += ` Nenhuma loja com ao menos ${BASE_MINIMA_OTD} entregas abaixo da meta.`;
-      }
-      const tom = total.otd.atual < META_OTD ? 'ruim' : (baixas.length ? 'alerta' : 'bom');
-      itens.push({ tom, texto });
-    }
-    return itens;
-  }
-
-  function destaquesLoja(ind, ctx) {
-    const itens = [fraseVendas('GMV', ind.gmv, ctx)];
-    if (ind.gmv.variacao != null) {
-      const delta = ind.gmv.real - ind.gmv.anterior;
-      itens.push({
-        tom: delta >= 0 ? 'bom' : 'ruim',
-        texto: `GMV ${fmt.variacao.format(ind.gmv.variacao)} vs mesmo período do mês anterior (${reais(delta, true)}).`,
-      });
-    }
-    if (ind.otd.atual != null) {
-      const pequena = ind.otd.entregues < BASE_MINIMA_OTD;
-      itens.push({
-        tom: pequena ? 'neutro' : (ind.otd.atual >= META_OTD ? 'bom' : 'ruim'),
-        texto: `OTD de ${fmt.pct.format(ind.otd.atual)} em ${fmt.inteiro.format(ind.otd.entregues)} entregas (meta ${fmt.pct0.format(META_OTD)}).`
-          + (pequena ? ' Base pequena: o percentual oscila muito com poucos pedidos.' : ''),
-      });
-    }
-    const { disponiveis, avaria } = ind.estoque;
-    if (disponiveis != null) {
-      const parteAvaria = avaria ? ` e ${fmt.inteiro.format(avaria)} em avaria (${fmt.pct.format(avaria / (disponiveis + avaria))} do total)` : '';
-      itens.push({ tom: 'neutro', texto: `Estoque com ${fmt.inteiro.format(disponiveis)} itens disponíveis${parteAvaria}.` });
-    }
-    return itens;
-  }
-
-  function secaoResumo(total, porLoja, ctx) {
-    const secao = novaSecao({ sobretitulo: 'Destaques do período', titulo: 'Resumo' }, ctx);
+  function listaDestaques(itens) {
     const lista = criar('ul', 'destaques');
-    const itens = ctx.loja === TODAS ? destaquesGerais(total, porLoja, ctx) : destaquesLoja(total, ctx);
     for (const { tom, texto } of itens) lista.append(criar('li', `destaque destaque--${tom}`, texto));
-    secao.append(lista);
+    return lista;
+  }
+
+  function secaoResumo(total, porLoja, alertas, ctx) {
+    const secao = novaSecao({ sobretitulo: 'Destaques do período', titulo: 'Resumo' }, ctx);
+    const itens = ctx.loja === TODAS
+      ? N.destaquesGerais(total, porLoja, estado.base, ctx)
+      : [...alertas.map(a => ({ tom: 'alerta', texto: `Atenção ao dado: ${a.texto}` })), ...N.destaquesLoja(total, ctx)];
+    secao.append(listaDestaques(itens));
+    return secao;
+  }
+
+  function secaoAlertas(alertas, ctx) {
+    const secao = novaSecao({
+      sobretitulo: 'Qualidade dos dados',
+      titulo: 'Alertas de dados',
+      nota: 'Quedas abruptas e lacunas que costumam ser problema de integração ou de cadastro, não do negócio. Vale checar antes de agir em cima desses números.',
+    }, ctx);
+    secao.append(listaDestaques(alertas.map(a => ({ tom: 'alerta', texto: a.texto }))));
+    return secao;
+  }
+
+  // Mix de canais: barras horizontais de uma cor; "Sem informação" e "Outros" em cinza
+  function secaoCanais(resumo, ctx) {
+    const secao = novaSecao({
+      sobretitulo: 'De onde vem o GMV',
+      titulo: 'Canais de venda',
+      nota: `Participação no GMV do período e variação vs ${N.COMPARACOES[ctx.comparacao].curto}. Site próprio = canais do tipo flagship.`,
+    }, ctx);
+    const caixa = criar('div', 'canais');
+    const maior = Math.max(...resumo.itens.map(c => c.parcela), 0.0001);
+    for (const c of resumo.itens) {
+      const linhaCanal = criar('div', 'canal');
+      linhaCanal.title = `${c.canal}: ${reais(c.atual)} no período, ${reais(c.anterior)} na comparação`;
+      linhaCanal.append(criar('span', 'canal__nome', c.canal));
+      const trilho = criar('div', 'canal__trilho');
+      const barra = criar('div', `canal__barra${c.canal === 'Sem informação' || c.tipo === 'Outros' ? ' canal__barra--neutra' : ''}`);
+      barra.style.width = `${(c.parcela / maior) * 100}%`;
+      trilho.append(barra);
+      linhaCanal.append(trilho);
+      linhaCanal.append(criar('span', 'canal__valor', `${reais(c.atual)} · ${fmt.pct0.format(c.parcela)}`));
+      if (c.variacao == null) {
+        linhaCanal.append(criar('span', 'canal__var delta--neutro', 'novo'));
+      } else {
+        const classe = c.variacao > 0 ? 'delta--bom' : c.variacao < 0 ? 'delta--ruim' : 'delta--neutro';
+        linhaCanal.append(criar('span', `canal__var delta ${classe}`, `${c.variacao > 0 ? '▲' : c.variacao < 0 ? '▼' : '■'} ${fmt.variacao.format(c.variacao)}`));
+      }
+      caixa.append(linhaCanal);
+    }
+    secao.append(caixa);
+    return secao;
+  }
+
+  function secaoSaude(item, posicao, ctx) {
+    const secao = novaSecao({
+      sobretitulo: 'Diagnóstico',
+      titulo: 'Saúde da loja',
+      nota: 'Combina vendas vs meta, OTD, ruptura, avaria e NPS (quando houver base). Limites de ruptura, avaria e NPS são pontos de partida e podem ser ajustados.',
+    }, ctx);
+    const grade = criar('div', 'secao__grade');
+
+    const card = criar('article', 'tile');
+    card.append(criar('h3', 'tile__rotulo', 'Saúde geral'));
+    card.append(criar('p', `tile__valor saude saude--${item.saude.classe}`, item.saude.rotulo));
+    const lista = criar('ul', 'componentes');
+    for (const c of item.saude.componentes) {
+      const li = criar('li', 'componente');
+      li.append(status(c.classe, c.nome), ` ${c.texto}`);
+      lista.append(li);
+    }
+    card.append(lista);
+    if (item.ind.farolCs) {
+      const cs = linha(`Farol de CS (manual): ${item.ind.farolCs}`);
+      if (item.ind.farolCsDetalhe) cs.title = item.ind.farolCsDetalhe;
+      card.append(cs);
+    }
+    grade.append(card);
+
+    if (posicao) {
+      const cardPosicao = criar('article', 'tile tile--largo');
+      cardPosicao.append(criar('h3', 'tile__rotulo', `Posição entre as lojas ${posicao.modelo}`));
+      const tabela = criar('table', 'tabela tabela--compacta');
+      const corpo = tabela.createTBody();
+      for (const l of posicao.linhas) {
+        const tr = corpo.insertRow();
+        const nome = criar('th', '', l.nome);
+        nome.scope = 'row';
+        tr.append(nome);
+        celula(tr, l.valor);
+        celula(tr, `${l.posicao}º de ${l.total}`);
+        tr.insertCell().append(status(l.classe, l.faixa));
+      }
+      cardPosicao.append(tabela);
+      grade.append(cardPosicao);
+    }
+    secao.append(grade);
     return secao;
   }
 
@@ -392,7 +386,7 @@
     const cabecalho = tabela.createTHead().insertRow();
     const colunas = [
       ['Loja', ''], ['GMV (R$)', 'num'], [`${meta} até ontem (R$)`, 'num'], ['Delta (%)', 'num'],
-      ['Diferença (R$)', 'num'], ['Projeção do mês (R$)', 'num'], ['OTD (%)', 'num'], ['Farol', ''],
+      ['Diferença (R$)', 'num'], ['Projeção do mês (R$)', 'num'], ['OTD (%)', 'num'], ['Farol', ''], ['Saúde', ''], ['CS', ''],
     ];
     for (const [texto, classe] of colunas) {
       const th = criar('th', classe, texto);
@@ -419,12 +413,17 @@
       celula(tr, g.diferenca == null ? '—' : fmt.inteiroSinal.format(g.diferenca));
       celula(tr, g.projecao == null ? '—' : fmt.inteiro.format(g.projecao));
       const otd = celula(tr, o.atual == null ? '—' : fmt.pct.format(o.atual));
-      if (o.atual != null && o.entregues < BASE_MINIMA_OTD) {
+      if (o.atual != null && o.entregues < N.BASE_MINIMA_OTD) {
         otd.classList.add('num--fraco');
         otd.title = `Base pequena: ${fmt.inteiro.format(o.entregues)} entregas`;
       }
-      const f = farol(g.atingimento);
+      const f = N.farol(g.atingimento);
       tr.insertCell().append(status(f.classe, f.curto));
+      const celulaSaude = tr.insertCell();
+      celulaSaude.append(status(x.saude.classe, x.saude.classe === 'neutro' ? '—' : x.saude.rotulo));
+      celulaSaude.title = x.saude.componentes.map(c => `${c.nome}: ${c.texto}`).join('\n');
+      const celulaCs = celula(tr, x.ind.farolCs ?? '—', '');
+      if (x.ind.farolCsDetalhe) celulaCs.title = x.ind.farolCsDetalhe;
     }
 
     const envoltorio = criar('div', 'tabela-envoltorio');
@@ -446,25 +445,48 @@
   // ---------------------------------------------------------------------------
   // Estado, filtros e carga
 
-  const estado = { base: null, ctx: { loja: TODAS, meta: 'forecast', tabelaCompleta: false } };
+  const estado = { base: null, ctx: { loja: TODAS, meta: 'forecast', comparacao: 'anterior', tabelaCompleta: false } };
 
   function renderizar() {
     const { base, ctx } = estado;
-    const linhas = ctx.loja === TODAS ? base.lojas : base.lojas.filter(l => l.loja === ctx.loja);
-    const total = indicadores(somar(linhas), ctx);
-    const porLoja = base.lojas.map(l => ({ loja: l.loja, ind: indicadores(l, ctx) }));
+    const todas = ctx.loja === TODAS;
+    const linhas = todas ? base.lojas : base.lojas.filter(l => l.loja === ctx.loja);
+    const filtroLojas = todas ? null : new Set([ctx.loja]);
+    const total = N.indicadores(N.somar(linhas), ctx);
+    const porLoja = base.lojas.map(l => {
+      const ind = N.indicadores(l, ctx);
+      return { loja: l.loja, modelo: l.modelo, ind, saude: N.saude(ind) };
+    });
+    const alertas = N.anomalias(todas ? porLoja : porLoja.filter(x => x.loja === ctx.loja), base, ctx, { geral: todas });
+    const faixa = N.faixaProjecao(N.serieDiaria(base.diario ?? [], filtroLojas), `gmv_${ctx.meta}`, total.gmv, base.data_ref);
+    const resumoCanais = N.canais(base.canais ?? [], filtroLojas, ctx);
 
-    el('secoes').replaceChildren(
-      secaoResumo(total, porLoja, ctx),
-      secaoCards(SECAO_VENDAS, total, ctx),
-      ...(ctx.loja === TODAS ? [secaoTabela(porLoja, ctx)] : []),
-      secaoCards(SECAO_ESTOQUE, total, ctx),
-      secaoCards(SECAO_OTD, total, ctx),
-    );
+    el('periodo').textContent = `Mês corrente: ${N.intervalo(base.periodo.atual)} · comparado com ${N.intervalo(periodoComparacao(ctx))} (${N.COMPARACOES[ctx.comparacao].curto})`;
+
+    const secoes = [secaoResumo(total, porLoja, alertas, ctx)];
+    if (todas && alertas.length) secoes.push(secaoAlertas(alertas, ctx));
+    if (!todas) {
+      const item = porLoja.find(x => x.loja === ctx.loja);
+      if (item && item.saude.componentes.length) {
+        secoes.push(secaoSaude(item, N.posicaoRelativa(ctx.loja, porLoja, item.modelo), ctx));
+      }
+    }
+    secoes.push(secaoCards(SECAO_VENDAS, total, ctx, { faixa }));
+    if (total.venda.atual.pedidos) secoes.push(secaoCards(SECAO_DECOMPOSICAO, total, ctx));
+    // Só "Sem informação" (ex.: GMV lançado manualmente) não diz nada sobre mix
+    if (resumoCanais.itens.length && resumoCanais.semCanal < 0.999) secoes.push(secaoCanais(resumoCanais, ctx));
+    if (todas) secoes.push(secaoTabela(porLoja, ctx));
+    if (total.growth.sessoes != null) secoes.push(secaoCards(SECAO_GROWTH, total, ctx));
+    secoes.push(secaoCards(SECAO_ESTOQUE, total, ctx));
+    secoes.push(secaoCards(SECAO_OTD, total, ctx));
+    if (total.nps.respostas) secoes.push(secaoCards(SECAO_NPS, total, ctx));
+
+    el('secoes').replaceChildren(...secoes);
   }
 
   // Estado inicial: URL > última escolha do usuário > padrão
-  function lerPreferencia(param, chave, validos, padrao) {
+  function lerPreferencia(param, validos) {
+    const { chave, padrao } = PREFERENCIAS[param];
     const daUrl = new URLSearchParams(location.search).get(param);
     if (daUrl && validos.includes(daUrl)) return daUrl;
     try {
@@ -474,7 +496,8 @@
     return padrao;
   }
 
-  function lembrar(param, chave, valor, padrao) {
+  function lembrar(param, valor) {
+    const { chave, padrao } = PREFERENCIAS[param];
     try { localStorage.setItem(chave, valor); } catch (_) { /* idem */ }
     const url = new URL(location.href);
     if (valor === padrao) url.searchParams.delete(param);
@@ -485,9 +508,24 @@
   function selecionarLoja(loja) {
     estado.ctx.loja = loja;
     el('seletor-loja').value = loja;
-    lembrar('loja', CHAVE_LOJA, loja, TODAS);
+    lembrar('loja', loja);
     renderizar();
     document.querySelector('.filtros').scrollIntoView({ behavior: 'smooth' });
+  }
+
+  // Alternador em pílula: botões com data-<atributo>, um ativo por vez
+  function montarAlternador(atributo, param, campoCtx, validos) {
+    const { ctx } = estado;
+    ctx[campoCtx] = lerPreferencia(param, validos);
+    const botoes = [...document.querySelectorAll(`[data-${atributo}]`)];
+    const marcar = () => botoes.forEach(b => b.setAttribute('aria-pressed', String(b.dataset[atributo] === ctx[campoCtx])));
+    marcar();
+    botoes.forEach(botao => botao.addEventListener('click', () => {
+      ctx[campoCtx] = botao.dataset[atributo];
+      lembrar(param, ctx[campoCtx]);
+      marcar();
+      renderizar();
+    }));
   }
 
   function montarFiltros() {
@@ -497,24 +535,19 @@
     seletor.append(new Option('Todas as lojas', TODAS));
     for (const loja of lojas) seletor.append(new Option(loja, loja));
 
-    ctx.loja = lerPreferencia('loja', CHAVE_LOJA, [TODAS, ...lojas], TODAS);
+    ctx.loja = lerPreferencia('loja', [TODAS, ...lojas]);
     seletor.value = ctx.loja;
     seletor.addEventListener('change', () => {
       ctx.loja = seletor.value;
-      lembrar('loja', CHAVE_LOJA, ctx.loja, TODAS);
+      lembrar('loja', ctx.loja);
       renderizar();
     });
 
-    ctx.meta = lerPreferencia('meta', CHAVE_META, Object.keys(METAS), 'forecast');
-    const botoes = [...document.querySelectorAll('[data-meta]')];
-    const marcar = () => botoes.forEach(b => b.setAttribute('aria-pressed', String(b.dataset.meta === ctx.meta)));
-    marcar();
-    botoes.forEach(botao => botao.addEventListener('click', () => {
-      ctx.meta = botao.dataset.meta;
-      lembrar('meta', CHAVE_META, ctx.meta, 'forecast');
-      marcar();
-      renderizar();
-    }));
+    montarAlternador('meta', 'meta', 'meta', Object.keys(N.METAS));
+    // Dados antigos sem o período alinhado: só o mês anterior fica disponível
+    const comparacoes = base.periodo.alinhado ? Object.keys(N.COMPARACOES) : ['anterior'];
+    if (!base.periodo.alinhado) el('filtro-comparacao').hidden = true;
+    montarAlternador('comp', 'comp', 'comparacao', comparacoes);
   }
 
   async function carregar() {
@@ -528,12 +561,12 @@
 
   carregar()
     .then(base => {
+      N.enriquecer(base.lojas);
       estado.base = base;
       const gerado = new Date(base.gerado_em).toLocaleString('pt-BR', {
         timeZone: 'America/Sao_Paulo', dateStyle: 'short', timeStyle: 'short',
       });
       el('atualizacao').textContent = `Atualizado em ${gerado}`;
-      el('periodo').textContent = `Mês corrente: ${intervalo(base.periodo.atual)} · comparado com ${intervalo(base.periodo.anterior)}`;
       montarFiltros();
       renderizar();
     })

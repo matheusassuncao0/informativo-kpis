@@ -1,77 +1,2099 @@
 {
-  "gerado_em": "2026-10-07T10:00:00.000Z",
-  "data_ref": "2026-10-06",
-  "periodo": {
-    "atual": { "inicio": "2026-10-01", "fim": "2026-10-06" },
-    "anterior": { "inicio": "2026-09-01", "fim": "2026-09-06" }
+ "gerado_em": "2026-10-07T10:00:00.000Z",
+ "data_ref": "2026-10-06",
+ "periodo": {
+  "atual": {
+   "inicio": "2026-10-01",
+   "fim": "2026-10-06"
   },
-  "lojas": [
-    {
-      "loja": "Loja exemplo A",
-      "gmv_atual": 1845300, "gmv_anterior": 1702150,
-      "gmv_forecast": 1790000, "gmv_budget": 1950000, "gmv_forecast_mes": 9350000, "gmv_budget_mes": 10200000,
-      "ser_atual": 221400, "ser_anterior": 198000,
-      "ser_forecast": 230000, "ser_budget": 240000, "ser_forecast_mes": 1200000, "ser_budget_mes": 1250000,
-      "itens_disponiveis": 182340, "itens_avaria": 1215,
-      "otd_entregues_atual": 8420, "otd_no_prazo_atual": 8105, "otd_entregues_anterior": 7980, "otd_no_prazo_anterior": 7470
-    },
-    {
-      "loja": "Loja exemplo B",
-      "gmv_atual": 612480, "gmv_anterior": 655900,
-      "gmv_forecast": 640000, "gmv_budget": 600000, "gmv_forecast_mes": 3300000, "gmv_budget_mes": 3100000,
-      "ser_atual": 70100, "ser_anterior": 75300,
-      "ser_forecast": 69000, "ser_budget": 72000, "ser_forecast_mes": 360000, "ser_budget_mes": 372000,
-      "itens_disponiveis": 64810, "itens_avaria": 0,
-      "otd_entregues_atual": 2310, "otd_no_prazo_atual": 2140, "otd_entregues_anterior": 2655, "otd_no_prazo_anterior": 2570
-    },
-    {
-      "loja": "Loja exemplo C",
-      "gmv_atual": 98750, "gmv_anterior": null,
-      "gmv_forecast": null, "gmv_budget": null, "gmv_forecast_mes": null, "gmv_budget_mes": null,
-      "ser_atual": null, "ser_anterior": null,
-      "ser_forecast": null, "ser_budget": null, "ser_forecast_mes": null, "ser_budget_mes": null,
-      "itens_disponiveis": 23905, "itens_avaria": null,
-      "otd_entregues_atual": 940, "otd_no_prazo_atual": 921, "otd_entregues_anterior": 0, "otd_no_prazo_anterior": 0
-    },
-    {
-      "loja": "Loja exemplo D",
-      "itens_disponiveis": 7120, "itens_avaria": 38
-    },
-    {
-      "loja": "Loja exemplo E",
-      "gmv_atual": 1120400, "gmv_anterior": 1310800,
-      "gmv_forecast": 1240000, "gmv_budget": 1300000, "gmv_forecast_mes": 6500000, "gmv_budget_mes": 6800000,
-      "ser_atual": 134000, "ser_anterior": 152000,
-      "ser_forecast": 150000, "ser_budget": 156000, "ser_forecast_mes": 780000, "ser_budget_mes": 810000,
-      "itens_disponiveis": 95400, "itens_avaria": 2310,
-      "otd_entregues_atual": 3120, "otd_no_prazo_atual": 2790, "otd_entregues_anterior": 2980, "otd_no_prazo_anterior": 2850
-    },
-    {
-      "loja": "Loja exemplo F",
-      "gmv_atual": 455900, "gmv_anterior": 398200,
-      "gmv_forecast": 430000, "gmv_budget": 445000, "gmv_forecast_mes": 2250000, "gmv_budget_mes": 2330000,
-      "ser_atual": 50100, "ser_anterior": 43800,
-      "ser_forecast": 47300, "ser_budget": 49000, "ser_forecast_mes": 247000, "ser_budget_mes": 256000,
-      "itens_disponiveis": 41200, "itens_avaria": 120,
-      "otd_entregues_atual": 1450, "otd_no_prazo_atual": 1428, "otd_entregues_anterior": 1210, "otd_no_prazo_anterior": 1180
-    },
-    {
-      "loja": "Loja exemplo G",
-      "gmv_atual": 287300, "gmv_anterior": 301500,
-      "gmv_forecast": 320000, "gmv_budget": 310000, "gmv_forecast_mes": 1700000, "gmv_budget_mes": 1650000,
-      "ser_atual": 31600, "ser_anterior": 33100,
-      "ser_forecast": 35200, "ser_budget": 34100, "ser_forecast_mes": 187000, "ser_budget_mes": 181000,
-      "itens_disponiveis": 18750, "itens_avaria": 410,
-      "otd_entregues_atual": 61, "otd_no_prazo_atual": 52, "otd_entregues_anterior": 70, "otd_no_prazo_anterior": 66
-    },
-    {
-      "loja": "Loja exemplo H",
-      "gmv_atual": 2980500, "gmv_anterior": 2640000,
-      "gmv_forecast": 2950000, "gmv_budget": 3100000, "gmv_forecast_mes": 15400000, "gmv_budget_mes": 16200000,
-      "ser_atual": 327800, "ser_anterior": 290000,
-      "ser_forecast": 324500, "ser_budget": 341000, "ser_forecast_mes": 1690000, "ser_budget_mes": 1780000,
-      "itens_disponiveis": 310500, "itens_avaria": 3980,
-      "otd_entregues_atual": 10240, "otd_no_prazo_atual": 9610, "otd_entregues_anterior": 9870, "otd_no_prazo_anterior": 9420
-    }
-  ]
+  "anterior": {
+   "inicio": "2026-09-01",
+   "fim": "2026-09-06"
+  },
+  "alinhado": {
+   "inicio": "2026-09-03",
+   "fim": "2026-09-08"
+  },
+  "mes": {
+   "inicio": "2026-10-01",
+   "fim": "2026-10-31"
+  }
+ },
+ "lojas": [
+  {
+   "loja": "Loja exemplo A",
+   "modelo": "B2C",
+   "gmv_atual": 1849018.27,
+   "gmv_anterior": 1705736.41,
+   "gmv_alinhado": 1744356.86,
+   "pedidos_atual": 4402,
+   "pedidos_anterior": 3980,
+   "pedidos_alinhado": 4070,
+   "itens_atual": 7044,
+   "itens_anterior": 6241,
+   "itens_alinhado": 6447,
+   "gmv_forecast": 1680581.74,
+   "gmv_budget": 1815028.28,
+   "gmv_forecast_mes": 8543473.02,
+   "gmv_budget_mes": 9226950.87,
+   "ser_atual": 221882.19,
+   "ser_anterior": 200594.6,
+   "ser_alinhado": 207229.59,
+   "ser_forecast": 228744.53,
+   "ser_budget": 247044.09,
+   "ser_forecast_mes": 1162854.9,
+   "ser_budget_mes": 1255883.29,
+   "itens_disponiveis": 182340,
+   "itens_avaria": 1215,
+   "skus_com_venda": 1800,
+   "skus_ruptura": 42,
+   "skus_ruptura_a": 6,
+   "skus_risco_ruptura": 25,
+   "disponivel_com_venda": 96000,
+   "demanda_dia": 2400,
+   "demanda_dia_ruptura": 78.4,
+   "estoque_ultima_integracao": "2026-10-07",
+   "farol_cs": "Feliz",
+   "farol_cs_detalhe": "B2C: Feliz",
+   "otd_entregues_atual": 8420,
+   "otd_no_prazo_atual": 8100,
+   "otd_entregues_anterior": 7980,
+   "otd_no_prazo_anterior": 7469,
+   "otd_entregues_alinhado": 8100,
+   "otd_no_prazo_alinhado": 7655,
+   "nps_respostas_atual": 640,
+   "nps_promotores_atual": 397,
+   "nps_detratores_atual": 77,
+   "nps_respostas_anterior": 610,
+   "nps_promotores_anterior": 354,
+   "nps_detratores_anterior": 85,
+   "sessoes_atual": 410000,
+   "transacoes_atual": 8610,
+   "sessoes_anterior": 380000,
+   "transacoes_anterior": 7600,
+   "sessoes_alinhado": 395000,
+   "transacoes_alinhado": 8098
+  },
+  {
+   "loja": "Loja exemplo B",
+   "modelo": "B2C",
+   "gmv_atual": 606810.43,
+   "gmv_anterior": 649689.97,
+   "gmv_alinhado": 632094.2,
+   "pedidos_atual": 2092,
+   "pedidos_anterior": 2128,
+   "pedidos_alinhado": 2071,
+   "itens_atual": 2720,
+   "itens_anterior": 2711,
+   "itens_alinhado": 2665,
+   "gmv_forecast": 626518.02,
+   "gmv_budget": 588926.94,
+   "gmv_forecast_mes": 3119480.64,
+   "gmv_budget_mes": 2932311.8,
+   "ser_atual": 66749.15,
+   "ser_anterior": 70036.58,
+   "ser_alinhado": 68835.06,
+   "ser_forecast": 66088.26,
+   "ser_budget": 62122.97,
+   "ser_forecast_mes": 329058.47,
+   "ser_budget_mes": 309314.96,
+   "itens_disponiveis": 64810,
+   "itens_avaria": 0,
+   "skus_com_venda": 900,
+   "skus_ruptura": 85,
+   "skus_ruptura_a": 22,
+   "skus_risco_ruptura": 40,
+   "disponivel_com_venda": 30000,
+   "demanda_dia": 1300,
+   "demanda_dia_ruptura": 171.9,
+   "estoque_ultima_integracao": "2026-10-07",
+   "farol_cs": "Atenção",
+   "farol_cs_detalhe": "B2C: Atenção",
+   "otd_entregues_atual": 2310,
+   "otd_no_prazo_atual": 2139,
+   "otd_entregues_anterior": 2655,
+   "otd_no_prazo_anterior": 2570,
+   "otd_entregues_alinhado": 2500,
+   "otd_no_prazo_alinhado": 2400,
+   "nps_respostas_atual": 210,
+   "nps_promotores_atual": 101,
+   "nps_detratores_atual": 42,
+   "nps_respostas_anterior": 230,
+   "nps_promotores_anterior": 120,
+   "nps_detratores_anterior": 41,
+   "sessoes_atual": 150000,
+   "transacoes_atual": 2400,
+   "sessoes_anterior": 160000,
+   "transacoes_anterior": 2880,
+   "sessoes_alinhado": 155000,
+   "transacoes_alinhado": 2713
+  },
+  {
+   "loja": "Loja exemplo C",
+   "modelo": "B2C",
+   "gmv_atual": 91168.06,
+   "gmv_anterior": null,
+   "gmv_alinhado": null,
+   "pedidos_atual": 608,
+   "pedidos_anterior": 0,
+   "pedidos_alinhado": 0,
+   "itens_atual": 729,
+   "itens_anterior": null,
+   "itens_alinhado": null,
+   "gmv_forecast": null,
+   "gmv_budget": null,
+   "gmv_forecast_mes": null,
+   "gmv_budget_mes": null,
+   "itens_disponiveis": 23905,
+   "itens_avaria": null,
+   "skus_com_venda": 400,
+   "skus_ruptura": 12,
+   "skus_ruptura_a": 0,
+   "skus_risco_ruptura": 8,
+   "disponivel_com_venda": 9000,
+   "demanda_dia": 300,
+   "demanda_dia_ruptura": 12.6,
+   "estoque_ultima_integracao": "2026-10-07",
+   "farol_cs": "Atenção",
+   "farol_cs_detalhe": "B2C: Atenção",
+   "otd_entregues_atual": 940,
+   "otd_no_prazo_atual": 921,
+   "otd_entregues_anterior": 0,
+   "otd_no_prazo_anterior": 0,
+   "otd_entregues_alinhado": 0,
+   "otd_no_prazo_alinhado": 0,
+   "sessoes_atual": 30000,
+   "transacoes_atual": 360,
+   "sessoes_anterior": null,
+   "transacoes_anterior": null,
+   "sessoes_alinhado": null,
+   "transacoes_alinhado": null
+  },
+  {
+   "loja": "Loja exemplo D",
+   "modelo": null,
+   "itens_disponiveis": 7120,
+   "itens_avaria": 38,
+   "skus_com_venda": 120,
+   "skus_ruptura": 3,
+   "skus_ruptura_a": 0,
+   "skus_risco_ruptura": 2,
+   "disponivel_com_venda": 2000,
+   "demanda_dia": 90,
+   "demanda_dia_ruptura": 3.2,
+   "estoque_ultima_integracao": "2026-10-07",
+   "otd_entregues_atual": 0,
+   "otd_no_prazo_atual": 0,
+   "otd_entregues_anterior": 410,
+   "otd_no_prazo_anterior": 390,
+   "otd_entregues_alinhado": 400,
+   "otd_no_prazo_alinhado": 380
+  },
+  {
+   "loja": "Loja exemplo E",
+   "modelo": "B2C",
+   "gmv_atual": 1051028,
+   "gmv_anterior": 1229272.51,
+   "gmv_alinhado": 1194350,
+   "pedidos_atual": 2061,
+   "pedidos_anterior": 2483,
+   "pedidos_alinhado": 2412,
+   "itens_atual": 2885,
+   "itens_anterior": 3406,
+   "itens_alinhado": 3343,
+   "gmv_forecast": 1230122.19,
+   "gmv_budget": 1291628.3,
+   "gmv_forecast_mes": 6175829.66,
+   "gmv_budget_mes": 6484621.14,
+   "ser_atual": 126123.36,
+   "ser_anterior": 144562.45,
+   "ser_alinhado": 141888.78,
+   "ser_forecast": 141711.64,
+   "ser_budget": 148797.22,
+   "ser_forecast_mes": 711463.43,
+   "ser_budget_mes": 747036.6,
+   "itens_disponiveis": 95400,
+   "itens_avaria": 2310,
+   "skus_com_venda": 1500,
+   "skus_ruptura": 160,
+   "skus_ruptura_a": 35,
+   "skus_risco_ruptura": 70,
+   "disponivel_com_venda": 52000,
+   "demanda_dia": 2100,
+   "demanda_dia_ruptura": 313.6,
+   "estoque_ultima_integracao": "2026-10-07",
+   "farol_cs": "Feliz",
+   "farol_cs_detalhe": "B2C: Feliz",
+   "otd_entregues_atual": 3120,
+   "otd_no_prazo_atual": 2789,
+   "otd_entregues_anterior": 2980,
+   "otd_no_prazo_anterior": 2849,
+   "otd_entregues_alinhado": 3050,
+   "otd_no_prazo_alinhado": 2898,
+   "nps_respostas_atual": 300,
+   "nps_promotores_atual": 120,
+   "nps_detratores_atual": 84,
+   "nps_respostas_anterior": 280,
+   "nps_promotores_anterior": 132,
+   "nps_detratores_anterior": 62,
+   "sessoes_atual": 260000,
+   "transacoes_atual": 3250,
+   "sessoes_anterior": 270000,
+   "transacoes_anterior": 3996,
+   "sessoes_alinhado": 265000,
+   "transacoes_alinhado": 3843
+  },
+  {
+   "loja": "Loja exemplo F",
+   "modelo": "B2C",
+   "gmv_atual": 429708.27,
+   "gmv_anterior": 375291.07,
+   "gmv_alinhado": 383668.1,
+   "pedidos_atual": 2387,
+   "pedidos_anterior": 2106,
+   "pedidos_alinhado": 2153,
+   "itens_atual": 5013,
+   "itens_anterior": 4334,
+   "itens_alinhado": 4476,
+   "gmv_forecast": 419738.29,
+   "gmv_budget": 432330.44,
+   "gmv_forecast_mes": 2113459.02,
+   "gmv_budget_mes": 2176862.79,
+   "ser_atual": 47267.91,
+   "ser_anterior": 40456.38,
+   "ser_alinhado": 41781.46,
+   "ser_forecast": 44592.37,
+   "ser_budget": 45930.14,
+   "ser_forecast_mes": 224530.72,
+   "ser_budget_mes": 231266.65,
+   "itens_disponiveis": 41200,
+   "itens_avaria": 120,
+   "skus_com_venda": 600,
+   "skus_ruptura": 8,
+   "skus_ruptura_a": 1,
+   "skus_risco_ruptura": 6,
+   "disponivel_com_venda": 26000,
+   "demanda_dia": 900,
+   "demanda_dia_ruptura": 16.8,
+   "estoque_ultima_integracao": "2026-10-07",
+   "farol_cs": "Feliz",
+   "farol_cs_detalhe": "B2C: Feliz",
+   "otd_entregues_atual": 1450,
+   "otd_no_prazo_atual": 1428,
+   "otd_entregues_anterior": 1210,
+   "otd_no_prazo_anterior": 1180,
+   "otd_entregues_alinhado": 1300,
+   "otd_no_prazo_alinhado": 1274,
+   "nps_respostas_atual": 150,
+   "nps_promotores_atual": 99,
+   "nps_detratores_atual": 12,
+   "nps_respostas_anterior": 140,
+   "nps_promotores_anterior": 88,
+   "nps_detratores_anterior": 13,
+   "sessoes_atual": 90000,
+   "transacoes_atual": 1890,
+   "sessoes_anterior": 82000,
+   "transacoes_anterior": 1558,
+   "sessoes_alinhado": 86000,
+   "transacoes_alinhado": 1720
+  },
+  {
+   "loja": "Loja exemplo G",
+   "modelo": "B2C",
+   "gmv_atual": 270315.59,
+   "gmv_anterior": 283647,
+   "gmv_alinhado": 275832.23,
+   "pedidos_atual": 1175,
+   "pedidos_anterior": 1196,
+   "pedidos_alinhado": 1163,
+   "itens_atual": 1763,
+   "itens_anterior": 1758,
+   "itens_alinhado": 1727,
+   "gmv_forecast": 314707.74,
+   "gmv_budget": 305266.5,
+   "gmv_forecast_mes": 1562275.44,
+   "gmv_budget_mes": 1515407.18,
+   "ser_atual": 29734.71,
+   "ser_anterior": 30577.15,
+   "ser_alinhado": 30038.13,
+   "ser_forecast": 33038.57,
+   "ser_budget": 32047.41,
+   "ser_forecast_mes": 164010.42,
+   "ser_budget_mes": 159090.11,
+   "itens_disponiveis": 18750,
+   "itens_avaria": 410,
+   "skus_com_venda": 300,
+   "skus_ruptura": 20,
+   "skus_ruptura_a": 4,
+   "skus_risco_ruptura": 9,
+   "disponivel_com_venda": 11000,
+   "demanda_dia": 400,
+   "demanda_dia_ruptura": 37.3,
+   "estoque_ultima_integracao": "2026-10-02",
+   "farol_cs": "Churn",
+   "farol_cs_detalhe": "B2C: Churn",
+   "otd_entregues_atual": 61,
+   "otd_no_prazo_atual": 52,
+   "otd_entregues_anterior": 70,
+   "otd_no_prazo_anterior": 66,
+   "otd_entregues_alinhado": 66,
+   "otd_no_prazo_alinhado": 62,
+   "nps_respostas_atual": 18,
+   "nps_promotores_atual": 8,
+   "nps_detratores_atual": 4,
+   "nps_respostas_anterior": 20,
+   "nps_promotores_anterior": 10,
+   "nps_detratores_anterior": 4,
+   "sessoes_atual": 70000,
+   "transacoes_atual": 770,
+   "sessoes_anterior": 72000,
+   "transacoes_anterior": 864,
+   "sessoes_alinhado": 71000,
+   "transacoes_alinhado": 852
+  },
+  {
+   "loja": "Loja exemplo H",
+   "modelo": "B2B",
+   "gmv_atual": 2735101.97,
+   "gmv_anterior": 2422588.11,
+   "gmv_alinhado": 2486456.34,
+   "pedidos_atual": 855,
+   "pedidos_anterior": 787,
+   "pedidos_alinhado": 808,
+   "itens_atual": 20513,
+   "itens_anterior": 18518,
+   "itens_alinhado": 19200,
+   "gmv_forecast": 2934622,
+   "gmv_budget": 3081353.1,
+   "gmv_forecast_mes": 14877462.1,
+   "gmv_budget_mes": 15621335.2,
+   "ser_atual": 300861.22,
+   "ser_anterior": 261155,
+   "ser_alinhado": 270775.1,
+   "ser_forecast": 297882.39,
+   "ser_budget": 312776.51,
+   "ser_forecast_mes": 1510154.98,
+   "ser_budget_mes": 1585662.72,
+   "itens_disponiveis": 310500,
+   "itens_avaria": 3980,
+   "skus_com_venda": 2400,
+   "skus_ruptura": 30,
+   "skus_ruptura_a": 4,
+   "skus_risco_ruptura": 18,
+   "disponivel_com_venda": 150000,
+   "demanda_dia": 3800,
+   "demanda_dia_ruptura": 66.5,
+   "estoque_ultima_integracao": "2026-10-07",
+   "farol_cs": "Feliz",
+   "farol_cs_detalhe": "B2B: Feliz",
+   "otd_entregues_atual": 10240,
+   "otd_no_prazo_atual": 9605,
+   "otd_entregues_anterior": 9870,
+   "otd_no_prazo_anterior": 9416,
+   "otd_entregues_alinhado": 10000,
+   "otd_no_prazo_alinhado": 9500
+  }
+ ],
+ "canais": [
+  {
+   "loja": "Loja exemplo A",
+   "tipo": "Site próprio",
+   "canal": "Site próprio",
+   "gmv_atual": 1016960.05,
+   "gmv_anterior": 924509.13,
+   "gmv_alinhado": 941629.67
+  },
+  {
+   "loja": "Loja exemplo A",
+   "tipo": "Marketplace",
+   "canal": "Mercado Livre",
+   "gmv_atual": 369803.65,
+   "gmv_anterior": 321568.39,
+   "gmv_alinhado": 330181.83
+  },
+  {
+   "loja": "Loja exemplo A",
+   "tipo": "Marketplace",
+   "canal": "Amazon",
+   "gmv_atual": 277352.74,
+   "gmv_anterior": 291950.25,
+   "gmv_alinhado": 288909.1
+  },
+  {
+   "loja": "Loja exemplo A",
+   "tipo": "Marketplace",
+   "canal": "Magazine Luiza",
+   "gmv_atual": 184901.83,
+   "gmv_anterior": 181276.3,
+   "gmv_alinhado": 181989.99
+  },
+  {
+   "loja": "Loja exemplo B",
+   "tipo": "Site próprio",
+   "canal": "Site próprio",
+   "gmv_atual": 424767.3,
+   "gmv_anterior": 461703.59,
+   "gmv_alinhado": 453811.22
+  },
+  {
+   "loja": "Loja exemplo B",
+   "tipo": "Marketplace",
+   "canal": "Shopee",
+   "gmv_atual": 121362.09,
+   "gmv_anterior": 93355.45,
+   "gmv_alinhado": 97872.65
+  },
+  {
+   "loja": "Loja exemplo B",
+   "tipo": "Marketplace",
+   "canal": "Mercado Livre",
+   "gmv_atual": 60681.04,
+   "gmv_anterior": 67423.38,
+   "gmv_alinhado": 65957.66
+  },
+  {
+   "loja": "Loja exemplo C",
+   "tipo": "Site próprio",
+   "canal": "Site próprio",
+   "gmv_atual": 91168.06,
+   "gmv_anterior": null,
+   "gmv_alinhado": null
+  },
+  {
+   "loja": "Loja exemplo E",
+   "tipo": "Site próprio",
+   "canal": "Site próprio",
+   "gmv_atual": 472962.6,
+   "gmv_anterior": 591203.25,
+   "gmv_alinhado": 563050.71
+  },
+  {
+   "loja": "Loja exemplo E",
+   "tipo": "Marketplace",
+   "canal": "Mercado Livre",
+   "gmv_atual": 315308.4,
+   "gmv_anterior": 350342.67,
+   "gmv_alinhado": 342726.52
+  },
+  {
+   "loja": "Loja exemplo E",
+   "tipo": "Marketplace",
+   "canal": "Amazon",
+   "gmv_atual": 157654.2,
+   "gmv_anterior": 150146.86,
+   "gmv_alinhado": 151590.58
+  },
+  {
+   "loja": "Loja exemplo E",
+   "tipo": "Sem informação",
+   "canal": "Sem informação",
+   "gmv_atual": 105102.8,
+   "gmv_anterior": 105102.8,
+   "gmv_alinhado": 105102.8
+  },
+  {
+   "loja": "Loja exemplo F",
+   "tipo": "Site próprio",
+   "canal": "Site próprio",
+   "gmv_atual": 214854.14,
+   "gmv_anterior": 204622.99,
+   "gmv_alinhado": 206590.52
+  },
+  {
+   "loja": "Loja exemplo F",
+   "tipo": "Marketplace",
+   "canal": "TikTok Shop",
+   "gmv_atual": 128912.48,
+   "gmv_anterior": 71618.05,
+   "gmv_alinhado": 78605.17
+  },
+  {
+   "loja": "Loja exemplo F",
+   "tipo": "Marketplace",
+   "canal": "Shopee",
+   "gmv_atual": 85941.65,
+   "gmv_anterior": 61386.9,
+   "gmv_alinhado": 65107.31
+  },
+  {
+   "loja": "Loja exemplo G",
+   "tipo": "Site próprio",
+   "canal": "Site próprio",
+   "gmv_atual": 216252.47,
+   "gmv_anterior": 227634.18,
+   "gmv_alinhado": 225262.99
+  },
+  {
+   "loja": "Loja exemplo G",
+   "tipo": "Marketplace",
+   "canal": "Mercado Livre",
+   "gmv_atual": 54063.12,
+   "gmv_anterior": 55166.45,
+   "gmv_alinhado": 54942.19
+  },
+  {
+   "loja": "Loja exemplo H",
+   "tipo": "Marketplace",
+   "canal": "Portal B2B",
+   "gmv_atual": 1914571.38,
+   "gmv_anterior": 1664844.68,
+   "gmv_alinhado": 1709438.73
+  },
+  {
+   "loja": "Loja exemplo H",
+   "tipo": "Sem informação",
+   "canal": "Sem informação",
+   "gmv_atual": 820530.59,
+   "gmv_anterior": 759750.55,
+   "gmv_alinhado": 771175.37
+  }
+ ],
+ "diario": [
+  {
+   "loja": "Loja exemplo A",
+   "dia": "2026-10-01",
+   "gmv": 355760.99,
+   "gmv_forecast": 273727.26,
+   "gmv_budget": 295625.45
+  },
+  {
+   "loja": "Loja exemplo A",
+   "dia": "2026-10-02",
+   "gmv": 329423.48,
+   "gmv_forecast": 273741.37,
+   "gmv_budget": 295640.68
+  },
+  {
+   "loja": "Loja exemplo A",
+   "dia": "2026-10-03",
+   "gmv": 225103.14,
+   "gmv_forecast": 0,
+   "gmv_budget": 0
+  },
+  {
+   "loja": "Loja exemplo A",
+   "dia": "2026-10-04",
+   "gmv": 238585.99,
+   "gmv_forecast": 0,
+   "gmv_budget": 0
+  },
+  {
+   "loja": "Loja exemplo A",
+   "dia": "2026-10-05",
+   "gmv": 368710.23,
+   "gmv_forecast": 847964.59,
+   "gmv_budget": 915801.75
+  },
+  {
+   "loja": "Loja exemplo A",
+   "dia": "2026-10-06",
+   "gmv": 331434.43,
+   "gmv_forecast": 285148.52,
+   "gmv_budget": 307960.41
+  },
+  {
+   "loja": "Loja exemplo A",
+   "dia": "2026-10-07",
+   "gmv": null,
+   "gmv_forecast": 274444.54,
+   "gmv_budget": 296400.1
+  },
+  {
+   "loja": "Loja exemplo A",
+   "dia": "2026-10-08",
+   "gmv": null,
+   "gmv_forecast": 278468.93,
+   "gmv_budget": 300746.44
+  },
+  {
+   "loja": "Loja exemplo A",
+   "dia": "2026-10-09",
+   "gmv": null,
+   "gmv_forecast": 289057.1,
+   "gmv_budget": 312181.67
+  },
+  {
+   "loja": "Loja exemplo A",
+   "dia": "2026-10-10",
+   "gmv": null,
+   "gmv_forecast": 0,
+   "gmv_budget": 0
+  },
+  {
+   "loja": "Loja exemplo A",
+   "dia": "2026-10-11",
+   "gmv": null,
+   "gmv_forecast": 0,
+   "gmv_budget": 0
+  },
+  {
+   "loja": "Loja exemplo A",
+   "dia": "2026-10-12",
+   "gmv": null,
+   "gmv_forecast": 867527.33,
+   "gmv_budget": 936929.52
+  },
+  {
+   "loja": "Loja exemplo A",
+   "dia": "2026-10-13",
+   "gmv": null,
+   "gmv_forecast": 279785,
+   "gmv_budget": 302167.8
+  },
+  {
+   "loja": "Loja exemplo A",
+   "dia": "2026-10-14",
+   "gmv": null,
+   "gmv_forecast": 285935.87,
+   "gmv_budget": 308810.74
+  },
+  {
+   "loja": "Loja exemplo A",
+   "dia": "2026-10-15",
+   "gmv": null,
+   "gmv_forecast": 298292.6,
+   "gmv_budget": 322156.01
+  },
+  {
+   "loja": "Loja exemplo A",
+   "dia": "2026-10-16",
+   "gmv": null,
+   "gmv_forecast": 298598.02,
+   "gmv_budget": 322485.87
+  },
+  {
+   "loja": "Loja exemplo A",
+   "dia": "2026-10-17",
+   "gmv": null,
+   "gmv_forecast": 0,
+   "gmv_budget": 0
+  },
+  {
+   "loja": "Loja exemplo A",
+   "dia": "2026-10-18",
+   "gmv": null,
+   "gmv_forecast": 0,
+   "gmv_budget": 0
+  },
+  {
+   "loja": "Loja exemplo A",
+   "dia": "2026-10-19",
+   "gmv": null,
+   "gmv_forecast": 846822.7,
+   "gmv_budget": 914568.52
+  },
+  {
+   "loja": "Loja exemplo A",
+   "dia": "2026-10-20",
+   "gmv": null,
+   "gmv_forecast": 278175.38,
+   "gmv_budget": 300429.41
+  },
+  {
+   "loja": "Loja exemplo A",
+   "dia": "2026-10-21",
+   "gmv": null,
+   "gmv_forecast": 275343.41,
+   "gmv_budget": 297370.89
+  },
+  {
+   "loja": "Loja exemplo A",
+   "dia": "2026-10-22",
+   "gmv": null,
+   "gmv_forecast": 289903.52,
+   "gmv_budget": 313095.8
+  },
+  {
+   "loja": "Loja exemplo A",
+   "dia": "2026-10-23",
+   "gmv": null,
+   "gmv_forecast": 283001.41,
+   "gmv_budget": 305641.52
+  },
+  {
+   "loja": "Loja exemplo A",
+   "dia": "2026-10-24",
+   "gmv": null,
+   "gmv_forecast": 0,
+   "gmv_budget": 0
+  },
+  {
+   "loja": "Loja exemplo A",
+   "dia": "2026-10-25",
+   "gmv": null,
+   "gmv_forecast": 0,
+   "gmv_budget": 0
+  },
+  {
+   "loja": "Loja exemplo A",
+   "dia": "2026-10-26",
+   "gmv": null,
+   "gmv_forecast": 859967.38,
+   "gmv_budget": 928764.77
+  },
+  {
+   "loja": "Loja exemplo A",
+   "dia": "2026-10-27",
+   "gmv": null,
+   "gmv_forecast": 296474.48,
+   "gmv_budget": 320192.44
+  },
+  {
+   "loja": "Loja exemplo A",
+   "dia": "2026-10-28",
+   "gmv": null,
+   "gmv_forecast": 280791.61,
+   "gmv_budget": 303254.94
+  },
+  {
+   "loja": "Loja exemplo A",
+   "dia": "2026-10-29",
+   "gmv": null,
+   "gmv_forecast": 284123.83,
+   "gmv_budget": 306853.74
+  },
+  {
+   "loja": "Loja exemplo A",
+   "dia": "2026-10-30",
+   "gmv": null,
+   "gmv_forecast": 296178.17,
+   "gmv_budget": 319872.42
+  },
+  {
+   "loja": "Loja exemplo A",
+   "dia": "2026-10-31",
+   "gmv": null,
+   "gmv_forecast": 0,
+   "gmv_budget": 0
+  },
+  {
+   "loja": "Loja exemplo B",
+   "dia": "2026-10-01",
+   "gmv": 117158.47,
+   "gmv_forecast": 100040.16,
+   "gmv_budget": 94037.75
+  },
+  {
+   "loja": "Loja exemplo B",
+   "dia": "2026-10-02",
+   "gmv": 120448.89,
+   "gmv_forecast": 109003.58,
+   "gmv_budget": 102463.36
+  },
+  {
+   "loja": "Loja exemplo B",
+   "dia": "2026-10-03",
+   "gmv": 76472.93,
+   "gmv_forecast": 0,
+   "gmv_budget": 0
+  },
+  {
+   "loja": "Loja exemplo B",
+   "dia": "2026-10-04",
+   "gmv": 76834.4,
+   "gmv_forecast": 0,
+   "gmv_budget": 0
+  },
+  {
+   "loja": "Loja exemplo B",
+   "dia": "2026-10-05",
+   "gmv": 111458.69,
+   "gmv_forecast": 314027.61,
+   "gmv_budget": 295185.95
+  },
+  {
+   "loja": "Loja exemplo B",
+   "dia": "2026-10-06",
+   "gmv": 104437.05,
+   "gmv_forecast": 103446.67,
+   "gmv_budget": 97239.87
+  },
+  {
+   "loja": "Loja exemplo B",
+   "dia": "2026-10-07",
+   "gmv": null,
+   "gmv_forecast": 100264,
+   "gmv_budget": 94248.16
+  },
+  {
+   "loja": "Loja exemplo B",
+   "dia": "2026-10-08",
+   "gmv": null,
+   "gmv_forecast": 101946.43,
+   "gmv_budget": 95829.65
+  },
+  {
+   "loja": "Loja exemplo B",
+   "dia": "2026-10-09",
+   "gmv": null,
+   "gmv_forecast": 101806.79,
+   "gmv_budget": 95698.38
+  },
+  {
+   "loja": "Loja exemplo B",
+   "dia": "2026-10-10",
+   "gmv": null,
+   "gmv_forecast": 0,
+   "gmv_budget": 0
+  },
+  {
+   "loja": "Loja exemplo B",
+   "dia": "2026-10-11",
+   "gmv": null,
+   "gmv_forecast": 0,
+   "gmv_budget": 0
+  },
+  {
+   "loja": "Loja exemplo B",
+   "dia": "2026-10-12",
+   "gmv": null,
+   "gmv_forecast": 312279.02,
+   "gmv_budget": 293542.28
+  },
+  {
+   "loja": "Loja exemplo B",
+   "dia": "2026-10-13",
+   "gmv": null,
+   "gmv_forecast": 109062.07,
+   "gmv_budget": 102518.34
+  },
+  {
+   "loja": "Loja exemplo B",
+   "dia": "2026-10-14",
+   "gmv": null,
+   "gmv_forecast": 105196,
+   "gmv_budget": 98884.24
+  },
+  {
+   "loja": "Loja exemplo B",
+   "dia": "2026-10-15",
+   "gmv": null,
+   "gmv_forecast": 109340.28,
+   "gmv_budget": 102779.87
+  },
+  {
+   "loja": "Loja exemplo B",
+   "dia": "2026-10-16",
+   "gmv": null,
+   "gmv_forecast": 101089.03,
+   "gmv_budget": 95023.68
+  },
+  {
+   "loja": "Loja exemplo B",
+   "dia": "2026-10-17",
+   "gmv": null,
+   "gmv_forecast": 0,
+   "gmv_budget": 0
+  },
+  {
+   "loja": "Loja exemplo B",
+   "dia": "2026-10-18",
+   "gmv": null,
+   "gmv_forecast": 0,
+   "gmv_budget": 0
+  },
+  {
+   "loja": "Loja exemplo B",
+   "dia": "2026-10-19",
+   "gmv": null,
+   "gmv_forecast": 318047.58,
+   "gmv_budget": 298964.72
+  },
+  {
+   "loja": "Loja exemplo B",
+   "dia": "2026-10-20",
+   "gmv": null,
+   "gmv_forecast": 102877.87,
+   "gmv_budget": 96705.2
+  },
+  {
+   "loja": "Loja exemplo B",
+   "dia": "2026-10-21",
+   "gmv": null,
+   "gmv_forecast": 100748.76,
+   "gmv_budget": 94703.84
+  },
+  {
+   "loja": "Loja exemplo B",
+   "dia": "2026-10-22",
+   "gmv": null,
+   "gmv_forecast": 101152.36,
+   "gmv_budget": 95083.22
+  },
+  {
+   "loja": "Loja exemplo B",
+   "dia": "2026-10-23",
+   "gmv": null,
+   "gmv_forecast": 101698.12,
+   "gmv_budget": 95596.23
+  },
+  {
+   "loja": "Loja exemplo B",
+   "dia": "2026-10-24",
+   "gmv": null,
+   "gmv_forecast": 0,
+   "gmv_budget": 0
+  },
+  {
+   "loja": "Loja exemplo B",
+   "dia": "2026-10-25",
+   "gmv": null,
+   "gmv_forecast": 0,
+   "gmv_budget": 0
+  },
+  {
+   "loja": "Loja exemplo B",
+   "dia": "2026-10-26",
+   "gmv": null,
+   "gmv_forecast": 316206.52,
+   "gmv_budget": 297234.13
+  },
+  {
+   "loja": "Loja exemplo B",
+   "dia": "2026-10-27",
+   "gmv": null,
+   "gmv_forecast": 106868.58,
+   "gmv_budget": 100456.47
+  },
+  {
+   "loja": "Loja exemplo B",
+   "dia": "2026-10-28",
+   "gmv": null,
+   "gmv_forecast": 100334.53,
+   "gmv_budget": 94314.46
+  },
+  {
+   "loja": "Loja exemplo B",
+   "dia": "2026-10-29",
+   "gmv": null,
+   "gmv_forecast": 101393.5,
+   "gmv_budget": 95309.89
+  },
+  {
+   "loja": "Loja exemplo B",
+   "dia": "2026-10-30",
+   "gmv": null,
+   "gmv_forecast": 102651.18,
+   "gmv_budget": 96492.11
+  },
+  {
+   "loja": "Loja exemplo B",
+   "dia": "2026-10-31",
+   "gmv": null,
+   "gmv_forecast": 0,
+   "gmv_budget": 0
+  },
+  {
+   "loja": "Loja exemplo C",
+   "dia": "2026-10-01",
+   "gmv": 15780.14,
+   "gmv_forecast": null,
+   "gmv_budget": null
+  },
+  {
+   "loja": "Loja exemplo C",
+   "dia": "2026-10-02",
+   "gmv": 16956.72,
+   "gmv_forecast": null,
+   "gmv_budget": null
+  },
+  {
+   "loja": "Loja exemplo C",
+   "dia": "2026-10-03",
+   "gmv": 12363.1,
+   "gmv_forecast": null,
+   "gmv_budget": null
+  },
+  {
+   "loja": "Loja exemplo C",
+   "dia": "2026-10-04",
+   "gmv": 10130.94,
+   "gmv_forecast": null,
+   "gmv_budget": null
+  },
+  {
+   "loja": "Loja exemplo C",
+   "dia": "2026-10-05",
+   "gmv": 16570.93,
+   "gmv_forecast": null,
+   "gmv_budget": null
+  },
+  {
+   "loja": "Loja exemplo C",
+   "dia": "2026-10-06",
+   "gmv": 19366.23,
+   "gmv_forecast": null,
+   "gmv_budget": null
+  },
+  {
+   "loja": "Loja exemplo C",
+   "dia": "2026-10-07",
+   "gmv": null,
+   "gmv_forecast": null,
+   "gmv_budget": null
+  },
+  {
+   "loja": "Loja exemplo C",
+   "dia": "2026-10-08",
+   "gmv": null,
+   "gmv_forecast": null,
+   "gmv_budget": null
+  },
+  {
+   "loja": "Loja exemplo C",
+   "dia": "2026-10-09",
+   "gmv": null,
+   "gmv_forecast": null,
+   "gmv_budget": null
+  },
+  {
+   "loja": "Loja exemplo C",
+   "dia": "2026-10-10",
+   "gmv": null,
+   "gmv_forecast": null,
+   "gmv_budget": null
+  },
+  {
+   "loja": "Loja exemplo C",
+   "dia": "2026-10-11",
+   "gmv": null,
+   "gmv_forecast": null,
+   "gmv_budget": null
+  },
+  {
+   "loja": "Loja exemplo C",
+   "dia": "2026-10-12",
+   "gmv": null,
+   "gmv_forecast": null,
+   "gmv_budget": null
+  },
+  {
+   "loja": "Loja exemplo C",
+   "dia": "2026-10-13",
+   "gmv": null,
+   "gmv_forecast": null,
+   "gmv_budget": null
+  },
+  {
+   "loja": "Loja exemplo C",
+   "dia": "2026-10-14",
+   "gmv": null,
+   "gmv_forecast": null,
+   "gmv_budget": null
+  },
+  {
+   "loja": "Loja exemplo C",
+   "dia": "2026-10-15",
+   "gmv": null,
+   "gmv_forecast": null,
+   "gmv_budget": null
+  },
+  {
+   "loja": "Loja exemplo C",
+   "dia": "2026-10-16",
+   "gmv": null,
+   "gmv_forecast": null,
+   "gmv_budget": null
+  },
+  {
+   "loja": "Loja exemplo C",
+   "dia": "2026-10-17",
+   "gmv": null,
+   "gmv_forecast": null,
+   "gmv_budget": null
+  },
+  {
+   "loja": "Loja exemplo C",
+   "dia": "2026-10-18",
+   "gmv": null,
+   "gmv_forecast": null,
+   "gmv_budget": null
+  },
+  {
+   "loja": "Loja exemplo C",
+   "dia": "2026-10-19",
+   "gmv": null,
+   "gmv_forecast": null,
+   "gmv_budget": null
+  },
+  {
+   "loja": "Loja exemplo C",
+   "dia": "2026-10-20",
+   "gmv": null,
+   "gmv_forecast": null,
+   "gmv_budget": null
+  },
+  {
+   "loja": "Loja exemplo C",
+   "dia": "2026-10-21",
+   "gmv": null,
+   "gmv_forecast": null,
+   "gmv_budget": null
+  },
+  {
+   "loja": "Loja exemplo C",
+   "dia": "2026-10-22",
+   "gmv": null,
+   "gmv_forecast": null,
+   "gmv_budget": null
+  },
+  {
+   "loja": "Loja exemplo C",
+   "dia": "2026-10-23",
+   "gmv": null,
+   "gmv_forecast": null,
+   "gmv_budget": null
+  },
+  {
+   "loja": "Loja exemplo C",
+   "dia": "2026-10-24",
+   "gmv": null,
+   "gmv_forecast": null,
+   "gmv_budget": null
+  },
+  {
+   "loja": "Loja exemplo C",
+   "dia": "2026-10-25",
+   "gmv": null,
+   "gmv_forecast": null,
+   "gmv_budget": null
+  },
+  {
+   "loja": "Loja exemplo C",
+   "dia": "2026-10-26",
+   "gmv": null,
+   "gmv_forecast": null,
+   "gmv_budget": null
+  },
+  {
+   "loja": "Loja exemplo C",
+   "dia": "2026-10-27",
+   "gmv": null,
+   "gmv_forecast": null,
+   "gmv_budget": null
+  },
+  {
+   "loja": "Loja exemplo C",
+   "dia": "2026-10-28",
+   "gmv": null,
+   "gmv_forecast": null,
+   "gmv_budget": null
+  },
+  {
+   "loja": "Loja exemplo C",
+   "dia": "2026-10-29",
+   "gmv": null,
+   "gmv_forecast": null,
+   "gmv_budget": null
+  },
+  {
+   "loja": "Loja exemplo C",
+   "dia": "2026-10-30",
+   "gmv": null,
+   "gmv_forecast": null,
+   "gmv_budget": null
+  },
+  {
+   "loja": "Loja exemplo C",
+   "dia": "2026-10-31",
+   "gmv": null,
+   "gmv_forecast": null,
+   "gmv_budget": null
+  },
+  {
+   "loja": "Loja exemplo E",
+   "dia": "2026-10-01",
+   "gmv": 175752.79,
+   "gmv_forecast": 202961.51,
+   "gmv_budget": 213109.59
+  },
+  {
+   "loja": "Loja exemplo E",
+   "dia": "2026-10-02",
+   "gmv": 175626.4,
+   "gmv_forecast": 208370.9,
+   "gmv_budget": 218789.45
+  },
+  {
+   "loja": "Loja exemplo E",
+   "dia": "2026-10-03",
+   "gmv": 138904.09,
+   "gmv_forecast": 0,
+   "gmv_budget": 0
+  },
+  {
+   "loja": "Loja exemplo E",
+   "dia": "2026-10-04",
+   "gmv": 129778.77,
+   "gmv_forecast": 0,
+   "gmv_budget": 0
+  },
+  {
+   "loja": "Loja exemplo E",
+   "dia": "2026-10-05",
+   "gmv": 222179.66,
+   "gmv_forecast": 622124.66,
+   "gmv_budget": 653230.89
+  },
+  {
+   "loja": "Loja exemplo E",
+   "dia": "2026-10-06",
+   "gmv": 208786.28,
+   "gmv_forecast": 196665.11,
+   "gmv_budget": 206498.37
+  },
+  {
+   "loja": "Loja exemplo E",
+   "dia": "2026-10-07",
+   "gmv": null,
+   "gmv_forecast": 210159.32,
+   "gmv_budget": 220667.29
+  },
+  {
+   "loja": "Loja exemplo E",
+   "dia": "2026-10-08",
+   "gmv": null,
+   "gmv_forecast": 203563.92,
+   "gmv_budget": 213742.11
+  },
+  {
+   "loja": "Loja exemplo E",
+   "dia": "2026-10-09",
+   "gmv": null,
+   "gmv_forecast": 198480.22,
+   "gmv_budget": 208404.23
+  },
+  {
+   "loja": "Loja exemplo E",
+   "dia": "2026-10-10",
+   "gmv": null,
+   "gmv_forecast": 0,
+   "gmv_budget": 0
+  },
+  {
+   "loja": "Loja exemplo E",
+   "dia": "2026-10-11",
+   "gmv": null,
+   "gmv_forecast": 0,
+   "gmv_budget": 0
+  },
+  {
+   "loja": "Loja exemplo E",
+   "dia": "2026-10-12",
+   "gmv": null,
+   "gmv_forecast": 625685.68,
+   "gmv_budget": 656969.97
+  },
+  {
+   "loja": "Loja exemplo E",
+   "dia": "2026-10-13",
+   "gmv": null,
+   "gmv_forecast": 195756.01,
+   "gmv_budget": 205543.81
+  },
+  {
+   "loja": "Loja exemplo E",
+   "dia": "2026-10-14",
+   "gmv": null,
+   "gmv_forecast": 213258.05,
+   "gmv_budget": 223920.95
+  },
+  {
+   "loja": "Loja exemplo E",
+   "dia": "2026-10-15",
+   "gmv": null,
+   "gmv_forecast": 200781.05,
+   "gmv_budget": 210820.11
+  },
+  {
+   "loja": "Loja exemplo E",
+   "dia": "2026-10-16",
+   "gmv": null,
+   "gmv_forecast": 203561.49,
+   "gmv_budget": 213739.57
+  },
+  {
+   "loja": "Loja exemplo E",
+   "dia": "2026-10-17",
+   "gmv": null,
+   "gmv_forecast": 0,
+   "gmv_budget": 0
+  },
+  {
+   "loja": "Loja exemplo E",
+   "dia": "2026-10-18",
+   "gmv": null,
+   "gmv_forecast": 0,
+   "gmv_budget": 0
+  },
+  {
+   "loja": "Loja exemplo E",
+   "dia": "2026-10-19",
+   "gmv": null,
+   "gmv_forecast": 613758.39,
+   "gmv_budget": 644446.31
+  },
+  {
+   "loja": "Loja exemplo E",
+   "dia": "2026-10-20",
+   "gmv": null,
+   "gmv_forecast": 211764.03,
+   "gmv_budget": 222352.23
+  },
+  {
+   "loja": "Loja exemplo E",
+   "dia": "2026-10-21",
+   "gmv": null,
+   "gmv_forecast": 209713.49,
+   "gmv_budget": 220199.16
+  },
+  {
+   "loja": "Loja exemplo E",
+   "dia": "2026-10-22",
+   "gmv": null,
+   "gmv_forecast": 205455.45,
+   "gmv_budget": 215728.22
+  },
+  {
+   "loja": "Loja exemplo E",
+   "dia": "2026-10-23",
+   "gmv": null,
+   "gmv_forecast": 207922.52,
+   "gmv_budget": 218318.64
+  },
+  {
+   "loja": "Loja exemplo E",
+   "dia": "2026-10-24",
+   "gmv": null,
+   "gmv_forecast": 0,
+   "gmv_budget": 0
+  },
+  {
+   "loja": "Loja exemplo E",
+   "dia": "2026-10-25",
+   "gmv": null,
+   "gmv_forecast": 0,
+   "gmv_budget": 0
+  },
+  {
+   "loja": "Loja exemplo E",
+   "dia": "2026-10-26",
+   "gmv": null,
+   "gmv_forecast": 612829.67,
+   "gmv_budget": 643471.16
+  },
+  {
+   "loja": "Loja exemplo E",
+   "dia": "2026-10-27",
+   "gmv": null,
+   "gmv_forecast": 214648.18,
+   "gmv_budget": 225380.59
+  },
+  {
+   "loja": "Loja exemplo E",
+   "dia": "2026-10-28",
+   "gmv": null,
+   "gmv_forecast": 211342.94,
+   "gmv_budget": 221910.08
+  },
+  {
+   "loja": "Loja exemplo E",
+   "dia": "2026-10-29",
+   "gmv": null,
+   "gmv_forecast": 203973.97,
+   "gmv_budget": 214172.67
+  },
+  {
+   "loja": "Loja exemplo E",
+   "dia": "2026-10-30",
+   "gmv": null,
+   "gmv_forecast": 203053.1,
+   "gmv_budget": 213205.76
+  },
+  {
+   "loja": "Loja exemplo E",
+   "dia": "2026-10-31",
+   "gmv": null,
+   "gmv_forecast": 0,
+   "gmv_budget": 0
+  },
+  {
+   "loja": "Loja exemplo F",
+   "dia": "2026-10-01",
+   "gmv": 72662.94,
+   "gmv_forecast": 70175.96,
+   "gmv_budget": 72281.23
+  },
+  {
+   "loja": "Loja exemplo F",
+   "dia": "2026-10-02",
+   "gmv": 75557.26,
+   "gmv_forecast": 69302.32,
+   "gmv_budget": 71381.39
+  },
+  {
+   "loja": "Loja exemplo F",
+   "dia": "2026-10-03",
+   "gmv": 52800.42,
+   "gmv_forecast": 0,
+   "gmv_budget": 0
+  },
+  {
+   "loja": "Loja exemplo F",
+   "dia": "2026-10-04",
+   "gmv": 48539.46,
+   "gmv_forecast": 0,
+   "gmv_budget": 0
+  },
+  {
+   "loja": "Loja exemplo F",
+   "dia": "2026-10-05",
+   "gmv": 90926.3,
+   "gmv_forecast": 211698.84,
+   "gmv_budget": 218049.81
+  },
+  {
+   "loja": "Loja exemplo F",
+   "dia": "2026-10-06",
+   "gmv": 89221.9,
+   "gmv_forecast": 68561.17,
+   "gmv_budget": 70618.01
+  },
+  {
+   "loja": "Loja exemplo F",
+   "dia": "2026-10-07",
+   "gmv": null,
+   "gmv_forecast": 71232.09,
+   "gmv_budget": 73369.05
+  },
+  {
+   "loja": "Loja exemplo F",
+   "dia": "2026-10-08",
+   "gmv": null,
+   "gmv_forecast": 71228.66,
+   "gmv_budget": 73365.52
+  },
+  {
+   "loja": "Loja exemplo F",
+   "dia": "2026-10-09",
+   "gmv": null,
+   "gmv_forecast": 68421.66,
+   "gmv_budget": 70474.31
+  },
+  {
+   "loja": "Loja exemplo F",
+   "dia": "2026-10-10",
+   "gmv": null,
+   "gmv_forecast": 0,
+   "gmv_budget": 0
+  },
+  {
+   "loja": "Loja exemplo F",
+   "dia": "2026-10-11",
+   "gmv": null,
+   "gmv_forecast": 0,
+   "gmv_budget": 0
+  },
+  {
+   "loja": "Loja exemplo F",
+   "dia": "2026-10-12",
+   "gmv": null,
+   "gmv_forecast": 211178.17,
+   "gmv_budget": 217513.51
+  },
+  {
+   "loja": "Loja exemplo F",
+   "dia": "2026-10-13",
+   "gmv": null,
+   "gmv_forecast": 72622.11,
+   "gmv_budget": 74800.78
+  },
+  {
+   "loja": "Loja exemplo F",
+   "dia": "2026-10-14",
+   "gmv": null,
+   "gmv_forecast": 68918.37,
+   "gmv_budget": 70985.92
+  },
+  {
+   "loja": "Loja exemplo F",
+   "dia": "2026-10-15",
+   "gmv": null,
+   "gmv_forecast": 67982.96,
+   "gmv_budget": 70022.45
+  },
+  {
+   "loja": "Loja exemplo F",
+   "dia": "2026-10-16",
+   "gmv": null,
+   "gmv_forecast": 72604.59,
+   "gmv_budget": 74782.73
+  },
+  {
+   "loja": "Loja exemplo F",
+   "dia": "2026-10-17",
+   "gmv": null,
+   "gmv_forecast": 0,
+   "gmv_budget": 0
+  },
+  {
+   "loja": "Loja exemplo F",
+   "dia": "2026-10-18",
+   "gmv": null,
+   "gmv_forecast": 0,
+   "gmv_budget": 0
+  },
+  {
+   "loja": "Loja exemplo F",
+   "dia": "2026-10-19",
+   "gmv": null,
+   "gmv_forecast": 213208.88,
+   "gmv_budget": 219605.14
+  },
+  {
+   "loja": "Loja exemplo F",
+   "dia": "2026-10-20",
+   "gmv": null,
+   "gmv_forecast": 72249.94,
+   "gmv_budget": 74417.44
+  },
+  {
+   "loja": "Loja exemplo F",
+   "dia": "2026-10-21",
+   "gmv": null,
+   "gmv_forecast": 72554.32,
+   "gmv_budget": 74730.95
+  },
+  {
+   "loja": "Loja exemplo F",
+   "dia": "2026-10-22",
+   "gmv": null,
+   "gmv_forecast": 68984.41,
+   "gmv_budget": 71053.94
+  },
+  {
+   "loja": "Loja exemplo F",
+   "dia": "2026-10-23",
+   "gmv": null,
+   "gmv_forecast": 70237.72,
+   "gmv_budget": 72344.85
+  },
+  {
+   "loja": "Loja exemplo F",
+   "dia": "2026-10-24",
+   "gmv": null,
+   "gmv_forecast": 0,
+   "gmv_budget": 0
+  },
+  {
+   "loja": "Loja exemplo F",
+   "dia": "2026-10-25",
+   "gmv": null,
+   "gmv_forecast": 0,
+   "gmv_budget": 0
+  },
+  {
+   "loja": "Loja exemplo F",
+   "dia": "2026-10-26",
+   "gmv": null,
+   "gmv_forecast": 209080.87,
+   "gmv_budget": 215353.29
+  },
+  {
+   "loja": "Loja exemplo F",
+   "dia": "2026-10-27",
+   "gmv": null,
+   "gmv_forecast": 69542.42,
+   "gmv_budget": 71628.69
+  },
+  {
+   "loja": "Loja exemplo F",
+   "dia": "2026-10-28",
+   "gmv": null,
+   "gmv_forecast": 70425.84,
+   "gmv_budget": 72538.61
+  },
+  {
+   "loja": "Loja exemplo F",
+   "dia": "2026-10-29",
+   "gmv": null,
+   "gmv_forecast": 69852.67,
+   "gmv_budget": 71948.25
+  },
+  {
+   "loja": "Loja exemplo F",
+   "dia": "2026-10-30",
+   "gmv": null,
+   "gmv_forecast": 73395.06,
+   "gmv_budget": 75596.91
+  },
+  {
+   "loja": "Loja exemplo F",
+   "dia": "2026-10-31",
+   "gmv": null,
+   "gmv_forecast": 0,
+   "gmv_budget": 0
+  },
+  {
+   "loja": "Loja exemplo G",
+   "dia": "2026-10-01",
+   "gmv": 45761.43,
+   "gmv_forecast": 52535.46,
+   "gmv_budget": 50959.39
+  },
+  {
+   "loja": "Loja exemplo G",
+   "dia": "2026-10-02",
+   "gmv": 57886.31,
+   "gmv_forecast": 50184.28,
+   "gmv_budget": 48678.75
+  },
+  {
+   "loja": "Loja exemplo G",
+   "dia": "2026-10-03",
+   "gmv": 32650.81,
+   "gmv_forecast": 0,
+   "gmv_budget": 0
+  },
+  {
+   "loja": "Loja exemplo G",
+   "dia": "2026-10-04",
+   "gmv": 34071.69,
+   "gmv_forecast": 0,
+   "gmv_budget": 0
+  },
+  {
+   "loja": "Loja exemplo G",
+   "dia": "2026-10-05",
+   "gmv": 49802.09,
+   "gmv_forecast": 158197.51,
+   "gmv_budget": 153451.59
+  },
+  {
+   "loja": "Loja exemplo G",
+   "dia": "2026-10-06",
+   "gmv": 50143.26,
+   "gmv_forecast": 53790.48,
+   "gmv_budget": 52176.77
+  },
+  {
+   "loja": "Loja exemplo G",
+   "dia": "2026-10-07",
+   "gmv": null,
+   "gmv_forecast": 51297.32,
+   "gmv_budget": 49758.41
+  },
+  {
+   "loja": "Loja exemplo G",
+   "dia": "2026-10-08",
+   "gmv": null,
+   "gmv_forecast": 50819.36,
+   "gmv_budget": 49294.78
+  },
+  {
+   "loja": "Loja exemplo G",
+   "dia": "2026-10-09",
+   "gmv": null,
+   "gmv_forecast": 51921.52,
+   "gmv_budget": 50363.88
+  },
+  {
+   "loja": "Loja exemplo G",
+   "dia": "2026-10-10",
+   "gmv": null,
+   "gmv_forecast": 0,
+   "gmv_budget": 0
+  },
+  {
+   "loja": "Loja exemplo G",
+   "dia": "2026-10-11",
+   "gmv": null,
+   "gmv_forecast": 0,
+   "gmv_budget": 0
+  },
+  {
+   "loja": "Loja exemplo G",
+   "dia": "2026-10-12",
+   "gmv": null,
+   "gmv_forecast": 156000.25,
+   "gmv_budget": 151320.25
+  },
+  {
+   "loja": "Loja exemplo G",
+   "dia": "2026-10-13",
+   "gmv": null,
+   "gmv_forecast": 50755.39,
+   "gmv_budget": 49232.73
+  },
+  {
+   "loja": "Loja exemplo G",
+   "dia": "2026-10-14",
+   "gmv": null,
+   "gmv_forecast": 53531.9,
+   "gmv_budget": 51925.95
+  },
+  {
+   "loja": "Loja exemplo G",
+   "dia": "2026-10-15",
+   "gmv": null,
+   "gmv_forecast": 50628.56,
+   "gmv_budget": 49109.7
+  },
+  {
+   "loja": "Loja exemplo G",
+   "dia": "2026-10-16",
+   "gmv": null,
+   "gmv_forecast": 50252.57,
+   "gmv_budget": 48744.99
+  },
+  {
+   "loja": "Loja exemplo G",
+   "dia": "2026-10-17",
+   "gmv": null,
+   "gmv_forecast": 0,
+   "gmv_budget": 0
+  },
+  {
+   "loja": "Loja exemplo G",
+   "dia": "2026-10-18",
+   "gmv": null,
+   "gmv_forecast": 0,
+   "gmv_budget": 0
+  },
+  {
+   "loja": "Loja exemplo G",
+   "dia": "2026-10-19",
+   "gmv": null,
+   "gmv_forecast": 157422.69,
+   "gmv_budget": 152700.01
+  },
+  {
+   "loja": "Loja exemplo G",
+   "dia": "2026-10-20",
+   "gmv": null,
+   "gmv_forecast": 52580.62,
+   "gmv_budget": 51003.2
+  },
+  {
+   "loja": "Loja exemplo G",
+   "dia": "2026-10-21",
+   "gmv": null,
+   "gmv_forecast": 50432.41,
+   "gmv_budget": 48919.44
+  },
+  {
+   "loja": "Loja exemplo G",
+   "dia": "2026-10-22",
+   "gmv": null,
+   "gmv_forecast": 50044.8,
+   "gmv_budget": 48543.45
+  },
+  {
+   "loja": "Loja exemplo G",
+   "dia": "2026-10-23",
+   "gmv": null,
+   "gmv_forecast": 52212.9,
+   "gmv_budget": 50646.52
+  },
+  {
+   "loja": "Loja exemplo G",
+   "dia": "2026-10-24",
+   "gmv": null,
+   "gmv_forecast": 0,
+   "gmv_budget": 0
+  },
+  {
+   "loja": "Loja exemplo G",
+   "dia": "2026-10-25",
+   "gmv": null,
+   "gmv_forecast": 0,
+   "gmv_budget": 0
+  },
+  {
+   "loja": "Loja exemplo G",
+   "dia": "2026-10-26",
+   "gmv": null,
+   "gmv_forecast": 159543.71,
+   "gmv_budget": 154757.4
+  },
+  {
+   "loja": "Loja exemplo G",
+   "dia": "2026-10-27",
+   "gmv": null,
+   "gmv_forecast": 53812.88,
+   "gmv_budget": 52198.5
+  },
+  {
+   "loja": "Loja exemplo G",
+   "dia": "2026-10-28",
+   "gmv": null,
+   "gmv_forecast": 53622.76,
+   "gmv_budget": 52014.08
+  },
+  {
+   "loja": "Loja exemplo G",
+   "dia": "2026-10-29",
+   "gmv": null,
+   "gmv_forecast": 50478.12,
+   "gmv_budget": 48963.77
+  },
+  {
+   "loja": "Loja exemplo G",
+   "dia": "2026-10-30",
+   "gmv": null,
+   "gmv_forecast": 52209.92,
+   "gmv_budget": 50643.62
+  },
+  {
+   "loja": "Loja exemplo G",
+   "dia": "2026-10-31",
+   "gmv": null,
+   "gmv_forecast": 0,
+   "gmv_budget": 0
+  },
+  {
+   "loja": "Loja exemplo H",
+   "dia": "2026-10-01",
+   "gmv": 482318.05,
+   "gmv_forecast": 473709.66,
+   "gmv_budget": 497395.14
+  },
+  {
+   "loja": "Loja exemplo H",
+   "dia": "2026-10-02",
+   "gmv": 460958.72,
+   "gmv_forecast": 491704.76,
+   "gmv_budget": 516290
+  },
+  {
+   "loja": "Loja exemplo H",
+   "dia": "2026-10-03",
+   "gmv": 356216.62,
+   "gmv_forecast": 0,
+   "gmv_budget": 0
+  },
+  {
+   "loja": "Loja exemplo H",
+   "dia": "2026-10-04",
+   "gmv": 365953.14,
+   "gmv_forecast": 0,
+   "gmv_budget": 0
+  },
+  {
+   "loja": "Loja exemplo H",
+   "dia": "2026-10-05",
+   "gmv": 529883.78,
+   "gmv_forecast": 1482445.3,
+   "gmv_budget": 1556567.56
+  },
+  {
+   "loja": "Loja exemplo H",
+   "dia": "2026-10-06",
+   "gmv": 539771.67,
+   "gmv_forecast": 486762.28,
+   "gmv_budget": 511100.4
+  },
+  {
+   "loja": "Loja exemplo H",
+   "dia": "2026-10-07",
+   "gmv": null,
+   "gmv_forecast": 505140.53,
+   "gmv_budget": 530397.56
+  },
+  {
+   "loja": "Loja exemplo H",
+   "dia": "2026-10-08",
+   "gmv": null,
+   "gmv_forecast": 508251.57,
+   "gmv_budget": 533664.15
+  },
+  {
+   "loja": "Loja exemplo H",
+   "dia": "2026-10-09",
+   "gmv": null,
+   "gmv_forecast": 509609.66,
+   "gmv_budget": 535090.14
+  },
+  {
+   "loja": "Loja exemplo H",
+   "dia": "2026-10-10",
+   "gmv": null,
+   "gmv_forecast": 0,
+   "gmv_budget": 0
+  },
+  {
+   "loja": "Loja exemplo H",
+   "dia": "2026-10-11",
+   "gmv": null,
+   "gmv_forecast": 0,
+   "gmv_budget": 0
+  },
+  {
+   "loja": "Loja exemplo H",
+   "dia": "2026-10-12",
+   "gmv": null,
+   "gmv_forecast": 1489164.79,
+   "gmv_budget": 1563623.03
+  },
+  {
+   "loja": "Loja exemplo H",
+   "dia": "2026-10-13",
+   "gmv": null,
+   "gmv_forecast": 519309.47,
+   "gmv_budget": 545274.94
+  },
+  {
+   "loja": "Loja exemplo H",
+   "dia": "2026-10-14",
+   "gmv": null,
+   "gmv_forecast": 478958.94,
+   "gmv_budget": 502906.89
+  },
+  {
+   "loja": "Loja exemplo H",
+   "dia": "2026-10-15",
+   "gmv": null,
+   "gmv_forecast": 518713.34,
+   "gmv_budget": 544649
+  },
+  {
+   "loja": "Loja exemplo H",
+   "dia": "2026-10-16",
+   "gmv": null,
+   "gmv_forecast": 510569.89,
+   "gmv_budget": 536098.39
+  },
+  {
+   "loja": "Loja exemplo H",
+   "dia": "2026-10-17",
+   "gmv": null,
+   "gmv_forecast": 0,
+   "gmv_budget": 0
+  },
+  {
+   "loja": "Loja exemplo H",
+   "dia": "2026-10-18",
+   "gmv": null,
+   "gmv_forecast": 0,
+   "gmv_budget": 0
+  },
+  {
+   "loja": "Loja exemplo H",
+   "dia": "2026-10-19",
+   "gmv": null,
+   "gmv_forecast": 1464430.58,
+   "gmv_budget": 1537652.11
+  },
+  {
+   "loja": "Loja exemplo H",
+   "dia": "2026-10-20",
+   "gmv": null,
+   "gmv_forecast": 482195.37,
+   "gmv_budget": 506305.14
+  },
+  {
+   "loja": "Loja exemplo H",
+   "dia": "2026-10-21",
+   "gmv": null,
+   "gmv_forecast": 484864.95,
+   "gmv_budget": 509108.19
+  },
+  {
+   "loja": "Loja exemplo H",
+   "dia": "2026-10-22",
+   "gmv": null,
+   "gmv_forecast": 517505.14,
+   "gmv_budget": 543380.39
+  },
+  {
+   "loja": "Loja exemplo H",
+   "dia": "2026-10-23",
+   "gmv": null,
+   "gmv_forecast": 509839.98,
+   "gmv_budget": 535331.98
+  },
+  {
+   "loja": "Loja exemplo H",
+   "dia": "2026-10-24",
+   "gmv": null,
+   "gmv_forecast": 0,
+   "gmv_budget": 0
+  },
+  {
+   "loja": "Loja exemplo H",
+   "dia": "2026-10-25",
+   "gmv": null,
+   "gmv_forecast": 0,
+   "gmv_budget": 0
+  },
+  {
+   "loja": "Loja exemplo H",
+   "dia": "2026-10-26",
+   "gmv": null,
+   "gmv_forecast": 1468319.66,
+   "gmv_budget": 1541735.65
+  },
+  {
+   "loja": "Loja exemplo H",
+   "dia": "2026-10-27",
+   "gmv": null,
+   "gmv_forecast": 505450.34,
+   "gmv_budget": 530722.86
+  },
+  {
+   "loja": "Loja exemplo H",
+   "dia": "2026-10-28",
+   "gmv": null,
+   "gmv_forecast": 491986.64,
+   "gmv_budget": 516585.97
+  },
+  {
+   "loja": "Loja exemplo H",
+   "dia": "2026-10-29",
+   "gmv": null,
+   "gmv_forecast": 502836.96,
+   "gmv_budget": 527978.81
+  },
+  {
+   "loja": "Loja exemplo H",
+   "dia": "2026-10-30",
+   "gmv": null,
+   "gmv_forecast": 475692.28,
+   "gmv_budget": 499476.89
+  },
+  {
+   "loja": "Loja exemplo H",
+   "dia": "2026-10-31",
+   "gmv": null,
+   "gmv_forecast": 0,
+   "gmv_budget": 0
+  }
+ ],
+ "frescor": [
+  {
+   "fonte": "Vendas",
+   "ultima_carga": "2026-10-07T09:40:00.000Z",
+   "dado_ate": "2026-10-07"
+  },
+  {
+   "fonte": "Estoque",
+   "ultima_carga": "2026-10-07T06:15:00.000Z",
+   "dado_ate": "2026-10-07"
+  },
+  {
+   "fonte": "OTD",
+   "ultima_carga": "2026-10-05T03:00:00.000Z",
+   "dado_ate": "2026-10-04"
+  },
+  {
+   "fonte": "NPS",
+   "ultima_carga": "2026-10-07T05:30:00.000Z",
+   "dado_ate": "2026-09-16"
+  },
+  {
+   "fonte": "Farol de CS",
+   "ultima_carga": "2026-10-07T05:25:00.000Z",
+   "dado_ate": null
+  }
+ ]
 }

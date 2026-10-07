@@ -4,6 +4,8 @@
   "type": "module",
   "scripts": {
     "exportar": "node scripts/exportar-kpis.mjs",
+    "exemplo": "node scripts/gerar-exemplo.mjs",
+    "resumo": "node scripts/enviar-resumo.mjs",
     "servir": "node scripts/servir.mjs"
   },
   "engines": {
