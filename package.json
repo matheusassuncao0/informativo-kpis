@@ -1,0 +1,15 @@
+{
+  "name": "informativo-kpis",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "exportar": "node scripts/exportar-kpis.mjs",
+    "servir": "node scripts/servir.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@google-cloud/bigquery": "^9.1.0"
+  }
+}

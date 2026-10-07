@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Informativo de KPIs</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+  <header class="cabecalho">
+    <div class="conteudo cabecalho__linha">
+      <h1 class="cabecalho__titulo">Informativo de KPIs</h1>
+      <p class="cabecalho__atualizacao" id="atualizacao">Carregando…</p>
+    </div>
+  </header>
+
+  <div class="aviso-exemplo" id="aviso-exemplo" hidden>
+    <div class="conteudo">Dados de exemplo — o arquivo real (<code>data/kpis.json</code>) ainda não foi gerado.</div>
+  </div>
+
+  <main class="conteudo">
+    <section class="filtros" aria-label="Filtros">
+      <label class="filtro">
+        <span class="filtro__rotulo">Loja</span>
+        <select id="seletor-loja" class="filtro__controle"></select>
+      </label>
+      <div class="filtro" role="group" aria-labelledby="rotulo-meta">
+        <span class="filtro__rotulo" id="rotulo-meta">Meta</span>
+        <div class="alternador">
+          <button type="button" class="alternador__opcao" data-meta="forecast" aria-pressed="true">Forecast</button>
+          <button type="button" class="alternador__opcao" data-meta="budget" aria-pressed="false">Budget</button>
+        </div>
+      </div>
+      <p class="filtros__periodo" id="periodo"></p>
+    </section>
+
+    <div id="secoes"></div>
+  </main>
+
+  <footer class="rodape">
+    <div class="conteudo">Fonte: BigQuery · mesmas regras dos dashboards de Power BI · comparativo: mês corrente até D-1 vs mesmo período do mês anterior</div>
+  </footer>
+
+  <script src="assets/app.js"></script>
+</body>
+</html>

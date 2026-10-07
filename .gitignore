@@ -1,0 +1,4 @@
+node_modules/
+_site/
+# Gerado pelo workflow a cada execução; não versionar dados reais
+data/kpis.json

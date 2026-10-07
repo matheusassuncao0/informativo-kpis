@@ -1,0 +1,67 @@
+name: Atualizar KPIs
+
+on:
+  schedule:
+    - cron: '0 10 * * *' # 07:00 em Brasília
+  workflow_dispatch:
+    inputs:
+      data_ref:
+        description: 'Data de referência (YYYY-MM-DD). Vazio = D-1'
+        required: false
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      # Autenticação sem chave: Workload Identity Federation com uma service account
+      # que só tem leitura nas views usadas em sql/.
+      - uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+      - name: Exportar KPIs do BigQuery
+        run: npm run exportar
+        env:
+          BQ_PROJECT: ${{ vars.BQ_PROJECT }}
+          BQ_LOCATION: ${{ vars.BQ_LOCATION }}
+          DATA_REF: ${{ inputs.data_ref }}
+
+      - name: Montar site
+        run: |
+          mkdir -p _site
+          cp -r index.html assets data _site/
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - id: deploy
+        uses: actions/deploy-pages@v4

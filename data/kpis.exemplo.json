@@ -1,0 +1,72 @@
+{
+  "gerado_em": "2026-10-07T10:00:00.000Z",
+  "data_ref": "2026-10-06",
+  "periodo": {
+    "atual": {
+      "inicio": "2026-10-01",
+      "fim": "2026-10-06"
+    },
+    "anterior": {
+      "inicio": "2026-09-01",
+      "fim": "2026-09-06"
+    }
+  },
+  "lojas": [
+    {
+      "loja": "Loja exemplo A",
+      "gmv_atual": 1845300,
+      "gmv_anterior": 1702150,
+      "gmv_forecast": 1790000,
+      "gmv_budget": 1950000,
+      "ser_atual": 221400,
+      "ser_anterior": 198000,
+      "ser_forecast": 230000,
+      "ser_budget": 240000,
+      "itens_disponiveis": 182340,
+      "itens_avaria": 1215,
+      "otd_entregues_atual": 8420,
+      "otd_no_prazo_atual": 8105,
+      "otd_entregues_anterior": 7980,
+      "otd_no_prazo_anterior": 7470
+    },
+    {
+      "loja": "Loja exemplo B",
+      "gmv_atual": 612480,
+      "gmv_anterior": 655900,
+      "gmv_forecast": 640000,
+      "gmv_budget": 600000,
+      "ser_atual": 70100,
+      "ser_anterior": 75300,
+      "ser_forecast": 69000,
+      "ser_budget": 72000,
+      "itens_disponiveis": 64810,
+      "itens_avaria": 0,
+      "otd_entregues_atual": 2310,
+      "otd_no_prazo_atual": 2140,
+      "otd_entregues_anterior": 2655,
+      "otd_no_prazo_anterior": 2570
+    },
+    {
+      "loja": "Loja exemplo C",
+      "gmv_atual": 98750,
+      "gmv_anterior": null,
+      "gmv_forecast": null,
+      "gmv_budget": null,
+      "ser_atual": null,
+      "ser_anterior": null,
+      "ser_forecast": null,
+      "ser_budget": null,
+      "itens_disponiveis": 23905,
+      "itens_avaria": null,
+      "otd_entregues_atual": 940,
+      "otd_no_prazo_atual": 921,
+      "otd_entregues_anterior": 0,
+      "otd_no_prazo_anterior": 0
+    },
+    {
+      "loja": "Loja exemplo D",
+      "itens_disponiveis": 7120,
+      "itens_avaria": 38
+    }
+  ]
+}
