@@ -75,7 +75,7 @@ fatos AS (
 
 -- ELSE NULL (e não 0): sem venda no período, o card do dashboard fica em branco.
 SELECT
-  COALESCE(ds.company_name, '(sem loja)') AS loja,
+  TRIM(COALESCE(ds.company_name, si.company_name, '(sem loja)')) AS loja,
   SUM(IF(f.metrica = 'gmv' AND f.dia BETWEEN p.ini_atual AND p.fim_atual, f.valor, NULL)) AS gmv_atual,
   SUM(IF(f.metrica = 'gmv' AND f.dia BETWEEN p.ini_anterior AND p.fim_anterior, f.valor, NULL)) AS gmv_anterior,
   SUM(IF(f.metrica = 'gmv_forecast' AND f.dia BETWEEN p.ini_atual AND p.fim_atual, f.valor, NULL)) AS gmv_forecast,
@@ -92,6 +92,10 @@ FROM fatos AS f
 CROSS JOIN periodos AS p
 LEFT JOIN gold_master_data_context.dim_sellers AS ds
   ON ds.id = f.seller_id
+-- Sellers B2B (de dim_manufacturers) só existem aqui; sem este join, ~40% do forecast
+-- caía em "(sem loja)" (Reppos, Faber Castell, Mondelez...). O id é único na view.
+LEFT JOIN visualization_master_data_context.vw_sellers_industria AS si
+  ON si.id = f.seller_id
 -- Até fim_mes só para as metas: o realizado nunca passa de D-1 nos SUMs acima.
 WHERE f.dia BETWEEN p.ini_anterior AND p.fim_mes
 GROUP BY loja

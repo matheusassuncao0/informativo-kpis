@@ -16,7 +16,7 @@ WITH periodos AS (
 
 base AS (
   SELECT
-    COALESCE(s.company_name, '(sem loja)') AS loja,
+    TRIM(COALESCE(s.company_name, '(sem loja)')) AS loja,
     CASE
       WHEN f.delivery_date BETWEEN p.ini_atual AND p.fim_atual THEN 'atual'
       WHEN f.delivery_date BETWEEN p.ini_anterior AND p.fim_anterior THEN 'anterior'

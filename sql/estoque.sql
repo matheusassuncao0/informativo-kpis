@@ -5,7 +5,7 @@
 --                       e Pernod Ricard fica em branco
 -- No modelo, a loja vem de dim_distributors (source_location_id = id), não de dim_sellers.
 SELECT
-  COALESCE(d.company_name, '(sem loja)') AS loja,
+  TRIM(COALESCE(d.company_name, '(sem loja)')) AS loja,
   SUM(i.available) AS itens_disponiveis,
   CASE
     WHEN d.company_name = 'Pernod Ricard' THEN NULL

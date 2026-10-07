@@ -44,6 +44,10 @@ const numero = valor => {
   return Number.isFinite(n) ? n : null;
 };
 
+// As fontes escrevem a mesma loja de jeitos diferentes ("M.Officer" x "Mofficer",
+// "Samsung Pra Você" x "Samsung pra você"): junta por caixa, acento e pontuação.
+const chaveLoja = loja => loja.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9()]/g, '');
+
 const dataRef = process.env.DATA_REF || somarDias(hojeEmSaoPaulo(), -1);
 const periodo = {
   atual: { inicio: inicioDoMes(dataRef), fim: dataRef },
@@ -63,9 +67,16 @@ for (const nome of CONSULTAS) {
   console.log(`${nome}: ${linhas.length} lojas`);
 
   for (const { loja, ...campos } of linhas) {
-    const destino = porLoja.get(loja) ?? { loja };
-    for (const [campo, valor] of Object.entries(campos)) destino[campo] = numero(valor);
-    porLoja.set(loja, destino);
+    const chave = chaveLoja(loja);
+    const destino = porLoja.get(chave) ?? { loja }; // vale o nome da primeira fonte (vendas)
+    if (destino.loja !== loja) console.log(`  "${loja}" juntado com "${destino.loja}"`);
+    // Soma em vez de sobrescrever: a mesma loja pode vir em mais de uma linha
+    for (const [campo, valor] of Object.entries(campos)) {
+      const n = numero(valor);
+      if (n != null && destino[campo] != null) destino[campo] += n;
+      else if (n != null || !(campo in destino)) destino[campo] = n;
+    }
+    porLoja.set(chave, destino);
   }
 }
 
