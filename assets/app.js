@@ -21,6 +21,7 @@
   // tipo 'meta':  delta do realizado contra a meta escolhida, com farol
   const SECOES = [
     {
+      sobretitulo: 'Desempenho de vendas · One page',
       titulo: 'Vendas',
       nota: ctx => `Faturado por data de NF, tipo de venda "Venda" (mesmas regras da One page do Desempenho de vendas). Meta: ${METAS[ctx.meta]}.`,
       tiles: [
@@ -33,6 +34,7 @@
       ],
     },
     {
+      sobretitulo: 'Estoque B2C',
       titulo: 'Estoque',
       nota: 'Posição no momento da atualização, sem comparativo. Avaria da Pernod Ricard não é exibida (mesma regra do dashboard Estoque B2C).',
       tiles: [
@@ -41,7 +43,8 @@
       ],
     },
     {
-      titulo: 'OTD B2C',
+      sobretitulo: 'OTD B2C',
+      titulo: 'Entregas',
       nota: 'Pedidos B2C pela data de entrega (mesma regra do dashboard OTD B2C).',
       tiles: [
         { rotulo: 'Pedidos entregues (qtd.)', atual: s => s.otd_entregues_atual, anterior: s => s.otd_entregues_anterior, formato: 'inteiro', melhor: 'alta' },
@@ -187,7 +190,8 @@
 
     for (const secao of SECOES) {
       const bloco = criar('section', 'secao');
-      bloco.append(criar('h2', 'secao__testeira', secao.titulo));
+      if (secao.sobretitulo) bloco.append(criar('p', 'secao__sobretitulo', secao.sobretitulo));
+      bloco.append(criar('h2', 'secao__titulo', secao.titulo));
       if (secao.nota) bloco.append(criar('p', 'secao__nota', resolver(secao.nota, ctx)));
       const grade = criar('div', 'secao__grade');
       for (const tile of secao.tiles) grade.append(renderizarTile(tile, dados, base, ctx));

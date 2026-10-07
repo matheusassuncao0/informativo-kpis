@@ -4,13 +4,17 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Informativo de KPIs</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
-  <header class="cabecalho">
-    <div class="conteudo cabecalho__linha">
-      <h1 class="cabecalho__titulo">Informativo de KPIs</h1>
-      <p class="cabecalho__atualizacao" id="atualizacao">Carregando…</p>
+  <header class="topo">
+    <div class="conteudo topo__linha">
+      <img class="topo__logo" src="assets/logo-infracommerce.svg" alt="Infracommerce">
+      <p class="topo__tagline">Informativo de KPIs</p>
+      <p class="pilula" id="atualizacao">Carregando…</p>
     </div>
   </header>
 
@@ -19,6 +23,11 @@
   </div>
 
   <main class="conteudo">
+    <section class="hero">
+      <h1 class="hero__titulo">Indicadores do mês<br><span class="hero__destaque">vendas, estoque e entregas</span></h1>
+      <p class="hero__texto" id="periodo"></p>
+    </section>
+
     <section class="filtros" aria-label="Filtros">
       <label class="filtro">
         <span class="filtro__rotulo">Loja</span>
@@ -31,7 +40,6 @@
           <button type="button" class="alternador__opcao" data-meta="budget" aria-pressed="false">Budget</button>
         </div>
       </div>
-      <p class="filtros__periodo" id="periodo"></p>
     </section>
 
     <div id="secoes"></div>
